@@ -38,6 +38,10 @@
  ************************************************************************/
 
 #ifdef AMIGA
-#include "/debug/debugmail.h"
+#ifndef __AROS__
+#include "/debug/Debugmail.h"
+#else
+#include "../debug/Debugmail.h"
+#endif
 void REGARGS DebugMail(struct Data *, MailSubj, long, void *);
 #endif

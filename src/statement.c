@@ -44,9 +44,12 @@
 
 #include <proto/dos.h>
 #include <exec/execbase.h>
+#ifndef __AROS__
 #include <dos.h>
-
 #include "/funclib/funclib.h"
+#else
+#include "../funclib/funclib.h"
+#endif
 
 #else
 #include <sys/types.h>
@@ -420,7 +423,7 @@ Warn(struct Data *scr,
 }
 
 
-#ifndef AMIGA /* if not using SAS/C on Amiga */
+#if !defined(AMIGA) || !defined(SHARED)  /* if not using SAS/C on Amiga */
 
 #ifdef VARARG_FUNCTIONS
 long fplSendTags(void *anchor, ...)
@@ -1594,7 +1597,7 @@ functions(struct fplArgument *arg)
     CALL( Send(scr, inttags) );
     break;
 
-#if defined(AMIGA)
+#if defined(AMIGA) && defined(SHARED)
   case FNC_OPENLIB:
     CALL(OpenLib(scr,
                  (uchar *)arg->argv[0], /* name */
@@ -1637,7 +1640,7 @@ functions(struct fplArgument *arg)
   return(FPL_OK);
 }
 
-#if defined(AMIGA)
+#if defined(AMIGA) && defined(SHARED)
 ReturnCode REGARGS
 OpenLib(struct Data *scr,
         uchar *lib,        /* funclib name */

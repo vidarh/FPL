@@ -44,7 +44,9 @@
 #include <proto/dos.h>
 
 #include <exec/libraries.h>
+#ifndef __AROS__
 #include <dos.h>
+#endif
 
 #else
 #include <sys/types.h>
@@ -80,7 +82,7 @@ static ReturnCode INLINE Resize(struct Data *, struct Expr *, short);
 static ReturnCode REGARGS SkipStatement(struct Data *);
 static ReturnCode REGARGS StoreGlobals(struct Data *, uchar);
 static ReturnCode REGARGS Run(struct Data *, uchar *, uchar *, long, unsigned long *);
-static ReturnCode INLINE Switch(struct Data *, struct Expr *, short,
+static ReturnCode INLINE _Switch(struct Data *, struct Expr *, short,
                                 struct Condition *);
 static REGARGS void StoreBeginning(struct Data *, char *, long);
 /*
@@ -129,7 +131,23 @@ unsigned long strtags[]={FPLSEND_STRING, 0,
                          FPLSEND_DONTCOPY_STRING, TRUE,
                          FPLSEND_DONE};
 
-#ifndef AMIGA /* if not using SAS/C on Amiga */
+
+#ifdef __AROS__
+void __stack_chk_fail()
+{
+}
+#endif
+
+#if defined(UNIX) || defined(WIN32) || !defined(SHARED)
+long InterfaceCall(struct Data *scr,
+		   void *arg,
+		   long (*func)(void *))
+{
+  return func(arg);
+}
+#endif
+
+#if !defined(AMIGA) || !defined(SHARED)  /* if not using SAS/C on Amiga */
 
 /******************************************************/
 /* Parameter list frontends of the library functions: */
@@ -177,7 +195,7 @@ ReturnCode PREFIX fplExecuteFile(AREG(0) struct Data *scr,
 }
 
 
-#ifndef AMIGA /* if not using SAS/C on Amiga */
+#if !defined(AMIGA) || !defined(SHARED)  /* if not using SAS/C on Amiga */
 
 #ifdef VARARG_FUNCTIONS
 long fplExecuteScriptTags(void *anchor, uchar **program, long lines, ...)
@@ -257,8 +275,10 @@ ReadFile(void *fpl,
   struct FileLock *lock=NULL;
   struct FileHandle *fileread;
 
+#ifdef SHARED
   struct MyLibrary *lib = (struct MyLibrary *)getreg(REG_A6);
   struct Library *DOSBase = lib->ml_DosBase;
+#endif
 #else
   FILE *stream;
   struct stat statstr;
@@ -1405,7 +1425,7 @@ Script(AREG(2) struct Data *scr,  /* big FPL structure */
             switch(ident->data.external.ID) {
             case CMD_SWITCH:
               scr->breaks++; /* allow another level of break */
-              CALL(Switch(scr, val, control, con));
+              CALL(_Switch(scr, val, control, con));
               if(CheckIt(scr, val, control, &ret)) {
                 CleanUp(scr, control, levels);
                 return(ret);
@@ -1918,7 +1938,7 @@ StoreBeginning(struct Data *scr, char *text, long prg)
 }
 
 static ReturnCode INLINE
-Switch(struct Data *scr,
+_Switch(struct Data *scr,
        struct Expr *val,
        short control,
        struct Condition *con)
@@ -2655,11 +2675,3 @@ SkipStatement(struct Data *scr)
   return(FPL_OK);
 }
 
-#if defined(UNIX) || defined(WIN32)
-long InterfaceCall(struct Data *scr,
-		   void *arg,
-		   long (*func)(void *))
-{
-  return func(arg);
-}
-#endif

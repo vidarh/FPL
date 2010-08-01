@@ -155,7 +155,9 @@ long PREFIX fplOpenLib(AREG(0) struct Data *scr,
 #ifdef DEBUGMAIL
   DebugMail(scr, MAIL_FUNCTION, 500, "fplOpenLib");
 #endif
+#ifdef SHARED
   CALL(OpenLib(scr, name, version, &retval, (uchar)flags));
+#endif
   if(retval)
     return -retval;
   return FPL_OK;
@@ -170,7 +172,9 @@ long PREFIX fplCloseLib(AREG(0) struct Data *scr,
 #ifdef DEBUGMAIL
   DebugMail(scr, MAIL_FUNCTION, 500, "fplCloseLib");
 #endif
+#if defined(AMIGA) && defined(SHARED)
   CALL(CloseLib(scr, name, FPLLIB_FORCE, &retval));
+#endif
   if(retval)
     return -retval;
   return FPL_OK;

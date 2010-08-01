@@ -41,10 +41,29 @@
 
 #include "config.h"
 
+#ifndef __SASC
+#define __a0
+#define __a1
+#define __a2
+#define __a3
+#define __a4
+#define __a5
+#define __a6
+#define __d0
+#define __d1
+#define __d2
+#define __d3
+#define __d4
+#define __d5
+#define __d6
+#define __d7
+#define __asm
+#endif
+
 #include <string.h>
 #include "FPL.h"
 #if defined(AMIGA) && defined(SHARED)
-#include "LibAlloc.h" /* stack allocation routines */
+#include "liballoc.h" /* stack allocation routines */
 #endif
 
 /**********************************************************************
@@ -82,7 +101,7 @@
 
 #define BUF_SIZE (IDENTIFIER_LEN+3) /* "global" FPL buffer size */
 
-#if defined(AMIGA) && defined(SHARED)
+#if defined(AMIGA) 
 #define FPL_MIN_STACK 8000  /* smallest required stack */
 #define FPL_MAX_STACK 20000 /* maximum stack left after a run */
 #define FPL_MAX_LIMIT 40000 /* default maximum stack use possible */
@@ -494,8 +513,6 @@ extern long maxmem;
                         x.fib_Date.ds_Tick / TICKS_PER_SECOND)
 #define timeoffile(date,file)                                  \
       do {                                                     \
-        struct MyLibrary *lib = (struct MyLibrary *)getreg(REG_A6); \
-        struct Library *DOSBase = lib->ml_DosBase;             \
         register BPTR lock;                                    \
         struct FileInfoBlock fi;                               \
         date =0;                                               \
@@ -549,14 +566,21 @@ extern long maxmem;
    * parameters in certain registers and restore the A4 register.
    */
 
+#define AREG(x) register __a ## x
+#define DREG(x) register __d ## x
+
+#ifdef __SASC
 #define PREFIX __asm __saveds   /* special SAS/C ideas! Forces arguments
 				   to be puched in specified registers and
 				   forces the A6 register to be loaded at the
 				   beginning of the funtion. */
-#define AREG(x) register __a ## x
-#define DREG(x) register __d ## x
 #define REGARGS __regargs
 #define ASM __asm
+#else
+#define PREFIX
+#define REGARGS
+#define ASM
+#endif
 
  /***************************************
   *
@@ -1258,7 +1282,7 @@ ReturnCode  REGARGS Getword(struct Data *);
 
 uchar * REGARGS GetErrorMsg(struct Data *, long, uchar *);
 
-#if defined(UNIX) || defined(WIN32)
+#if defined(UNIX) || defined(WIN32) || !defined(SHARED)
 /* The Amiga version has this function coded in assembler */
 long InterfaceCall(struct Data *, void *, long (*)(void *));
 #define InterfaceCallNoStack InterfaceCall /* make them call the same func */

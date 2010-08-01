@@ -53,7 +53,7 @@
 
 struct fplStr EmptyString={0,0,0};
 
-#ifndef AMIGA /* if not using SAS/C on Amiga */
+#if !defined(AMIGA) || !defined(SHARED)  /* if not using SAS/C on Amiga */
 
 #ifdef VARARG_FUNCTIONS
 

@@ -49,6 +49,11 @@ struct MyLibrary {
 #endif
 };
 
+/* From script.h */
+struct Condition;
+struct Expr;
+struct Data;
+
 /*****************************************************
  *
  * InitStack(...);
@@ -57,10 +62,10 @@ struct MyLibrary {
  * Input : a (struct Data *) should be the first input.
  * Returns: nothing, but there's a new stack pointer!
  ******/
-long __asm InitStack(register __a2 struct Data *,
-                     register __a3 struct Expr *,
-                     register __d2 short,
-                     register __a1 struct Condition *);
+long InitStack(register __a2 struct Data *,
+			   register __a3 struct Expr *,
+			   register __d2 short,
+			   register __a1 struct Condition *);
 
 /*****************************************************
  *

@@ -83,6 +83,8 @@ struct Library *FPLBase = NULL;
 #define ASM
 #endif
 
+#include "script.h"
+
 long ASM func(REG(a0) struct fplArgument *);
 long ASM inter(REG(a0) void *);
 void CALLER ASM MyFree(REG(a1) void *, REG(d0) long);

@@ -49,7 +49,7 @@ index   contents comment
                  "CODE" is the name of the compiled code hunk
 ************************************************************************/
 
-#ifdef AMIGA
+#if defined(AMIGA) && !defined(__AROS__)
 #include "/compile/pass2.h"
 #else
 #include "../compile/pass2.h"

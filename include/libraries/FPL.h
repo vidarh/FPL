@@ -652,5 +652,5 @@ struct fplSymbol {
 #define FPLNAME "fpl.library"
 
 #define FPL_VERSION  14
-#define FPL_REVISION 11
+#define FPL_REVISION 12
 #endif

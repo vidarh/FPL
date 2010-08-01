@@ -40,7 +40,9 @@
 #ifdef AMIGA
 #include <exec/types.h>
 #include <proto/exec.h>
+#ifndef __AROS__
 #include <dos.h>
+#endif
 #else
 #include <stdio.h>
 #ifdef SUNOS
@@ -59,7 +61,7 @@
 
 static ReturnCode INLINE InitHash(struct Data *);
 static unsigned long INLINE Gethash(uchar *);
-static void * INLINE Init(struct Data *, long ASM (*)(AREG(0) void *), unsigned long *);
+static void * Init(struct Data *, long ASM (*)(AREG(0) void *), unsigned long *);
 static ReturnCode REGARGS SetTags(struct Data *, unsigned long *);
 static ReturnCode INLINE Hijack(struct Data *, struct Identifier *);
 static ReturnCode REGARGS AddIdentifier(struct Data *, struct Identifier *);
@@ -777,7 +779,7 @@ void PREFIX fplFree(AREG(0) struct Data *scr)
   scr=&onstack; /* use the `stack-struct' */
   DelProgram(scr, NULL); /* remove all programs from memory, some might be
 			    Lock()'ed! */
-#ifdef AMIGA /* only amiga supports funclibs! */
+#if defined(AMIGA) && defined(SHARED) /* only amiga supports funclibs! */
   CloseLib(scr, NULL, TRUE, &retval); /* force close of all funclibs */
 #endif
   FREEALL();
@@ -876,7 +878,7 @@ DelIdentifier(struct Data *scr,
 }
 
 
-#ifndef AMIGA /* if not using SAS/C on Amiga */
+#if !defined(AMIGA) || !defined(SHARED)  /* if not using SAS/C on Amiga */
 
 #ifdef VARARG_FUNCTIONS
 void *fplInitTags(long (*func)(void *), ...)
@@ -919,7 +921,7 @@ void * ASM fplInit(AREG(0) long (*function) (void *),
   void *init;
   scr=&point;
 
-#ifdef AMIGA
+#if defined(__AMIGA) && !defined(__AROS__)
   /* Store all register before loading index register */
   StoreRegisters(scr);
   geta4();
@@ -934,7 +936,7 @@ void * ASM fplInit(AREG(0) long (*function) (void *),
   return(init);
 }
 
-static void * INLINE Init(struct Data *scr,	/* stack oriented */
+static void * Init(struct Data *scr,	/* stack oriented */
 			  long ASM (*function) (AREG(0) void *), 
 			  unsigned long *tags) /* taglist */
 {

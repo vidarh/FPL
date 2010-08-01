@@ -39,7 +39,10 @@
 
 #ifdef AMIGA
 #include <exec/types.h>
+
+#ifndef __AROS__
 #include <dos.h>
+#endif
 
 #elif defined(UNIX) || defined(WIN32)
 #include <sys/types.h>

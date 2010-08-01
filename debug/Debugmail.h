@@ -1,3 +1,4 @@
+#include "SimpleRexx.h"
 
 #define MSGPORT_NAME "FPLdb_2" /* message port name */
 
