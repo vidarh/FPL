@@ -1,0 +1,86 @@
+# $VER: FPL Makefile v1.0 94-08-11
+
+########################################################################
+#                                                                      #
+# fpl.library - A shared library interpreting script langauge.         #
+# Copyright (C) 1992-1994 FrexxWare                                    #
+# Author: Daniel Stenberg                                              #
+#                                                                      #
+# This program is free software; you may redistribute for non          #
+# commercial purposes only. Commercial programs must have a written    #
+# permission from the author to use FPL. FPL is *NOT* public domain!   #
+# Any provided source code is only for reference and for assurance     #
+# that users should be able to compile FPL on any operating system     #
+# he/she wants to use it in!                                           #
+#                                                                      #
+# You may not change, resource, patch files or in any way reverse      #
+# engineer anything in the FPL package.                                #
+#                                                                      #
+# This program is distributed in the hope that it will be useful,      #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of       #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.                 #
+#                                                                      #
+# Daniel Stenberg                                                      #
+# Ankdammsgatan 36, 4tr                                                #
+# S-171 43 Solna                                                       #
+# Sweden                                                               #
+#                                                                      #
+# FidoNet 2:201/328    email:dast@sth.frontec.se                       #
+#                                                                      #
+########################################################################
+
+.SUFFIXES: .o .c .c~ .h .h~ .a .i
+
+################################################
+# Below follows all UNIX macros/actions/lines: #
+################################################
+
+LIB     = libfpl.a
+TARGET  = FPL
+OBJS    = script.o numexpr.o caller.o hash.o statement.o memory.o frontend.o\
+          reference.o sprintf.o scan.o sscanf.o compile.o
+LIBOBJS = script.o numexpr.o hash.o statement.o memory.o frontend.o \
+          reference.o sprintf.o scan.o compile.o sscanf.o
+
+# if using the `gcc' compiler:
+CFLAGS  = -DSUNOS -DUNIX -ansi -pedantic -pipe -funsigned-char -g
+CC      = gcc
+LD      = ld
+AR      = ar
+RANLIB  = ranlib
+
+all:	$(LIB) SFPL
+
+$(LIB) : $(LIBDEP)
+	$(AR) ruv $(LIB) $(LIBOBJS)
+	$(RANLIB) $(LIB)
+
+$(TARGET) : $(OBJS)
+	$(CC) $(OBJS) -L. -lfpl -o $(TARGET)
+
+clean:
+	rm *.o
+	rm $(LIB) SFPL
+
+.c.o:
+	$(CC) $(CFLAGS) -c $<
+
+# This compiling is using -DSFPL to make the MALLOC() macro not to use the
+# global `mem' variable!
+SFPL: caller.c FPL.h script.h Makefile.SUNOS
+	$(CC) $(CFLAGS) -DSFPL -o SFPL caller.c -L. -lfpl
+
+$(OBJS): script.h FPL.h Makefile.FILE
+
+script.o:script.c
+numexpr.o:numexpr.c
+caller.o:caller.c
+statement.o:statement.c
+hash.o:hash.c
+memory.o:memory.c memory.h
+frontend.o:frontend.c
+reference.o:reference.c reference.h
+sprintf.o:sprintf.c
+scan.o:scan.c
+sscanf.o:sscanf.c
+compile.o:compile.c

@@ -1,0 +1,405 @@
+HISTORY of changes
+
+Syntax description:
+	* Bug fix
+	+ New feature
+	- Note/change
+	: Obsolete/old stuff
+
+------------------------------------------------------------------------------
+
+14.12   - The win32 and unix version in the same archive. At last. May 9,
+          1998.
+
+14.11   - Completed my win32 port. No complaints when compiled with VC++ 4.2
+          (fplc still to go)
+
+        * The .FPL <-> .FPC checker did not work properly for non-amiga
+          systems. Now fixed.
+
+14.10	- The FPLTAG_INTERPRET tag does not work for compiled programs. I have
+	  not yet made the corrections that'll make it work. I don't know if I
+	  will either. I re-wrote some minor things in the FrexxEd FPL programs
+	  to avoid using this.
+
+	* exported symbols from within compiled programs were not deleted the
+	  proper way which could ruin internal lists
+
+14.9	* 'fplc' now uses a lot less memory when compiling.
+
+	* #line lines could get parsed very wrong by the compiler
+
+	* Compiled programs declared variables slightly wrong. They excluded
+	  the file name information which was lethal...
+
+14.8	- Slightly bug tested.
+
+	* Now compiled scripts run fine under unix-style OSes.
+
+	- Improved the nested runs data backup and removed the ugly 'struct
+	  Store' usage.
+
+	* Exported functions from compiled programs did not get their "I
+	  belong in this file" setup properly.
+
+	* it previously could crash some memory if a program that ran did very
+	  little and was allowed to return a string.
+
+	+ fpl (interpreter) now skips first lines that starts with '#!' to
+	  enable 100% use as a true unix script language. Unfortunately, the
+	  compiler does not [yet?] support this (since the preprocessor has a
+	  habit of adding a #line statement on the absolutely first line which
+	  ruins this). We might need to come up with a nice way to make work
+	  in the compiler as well as making compiled output that can be run in
+	  the same smooth manner under unix (and similar) operating systems.
+
+	* 'fplc' deals with cpp-instructions that skips 'line' as in '# 3'
+	  (such as the gcc preprocessor generates by default)
+
+	* the GETLONG macro used to run compiled programs crashed under
+	  solaris and made me decide to have one amiga version and one non-
+	  amiga. The non-amiga does not use those dirty typecasts of char
+	  pointers to long, but uses a function.
+
+14.7	* Compiles as shared library on Linux, Solaris and IRIX. Linked
+	  library on SunOS. More?
+
+	* Made returning strings from inside functions work [better]!
+	  Reported by Jorgen Olmats.
+
+	* fplc now deals with #line instructions followed by lines with quoted
+	  strings as it should.
+
+	* fplc did not deal with 'continue' properly until now.
+
+	+ fplc now shows version number when 'fplc' only is entered.
+
+14.6	- lots
+
+14.3	* conditional expressions ?:-style, were _not_ treated in a good way
+	  by the compiler.
+
+14.0	- rename() is from now on only possible on external or exported
+	  functions due to compiler effeciency decisions.
+
+        - expressions like (++name, name++) were *not* previously taken take
+	  care of properly.
+
+	- FPL compiler available. Running compiled programs is done
+	  transparent just as if they were still interpreted.
+
+13.8	* A single character access (from a string) were accepted in places
+	  where strings are required.
+
+13.7	+ If FPLTAG_ISOLATE is used in a fplExecuteXXXX() call, the program
+	  run can't access nor declare any exported identifiers. Only
+	  external, internal and those it creates within its own program.
+	  (FPLTAG_ISOLATE forces all 'export' variables to be treated as
+	  regular globals.)
+
+13.6	* Fixed a stupid read from NULL that could occur at strange times...
+
+13.5	* Executing files that only declared/exported variables/funcitons
+	  repeatedly wasn't taken care of properly...
+
+	* a fplAddFunction()-call with an already existing name didn't make
+	  FPL happy... (still doesn't, but now it survives!)
+
+13.4	* rename() to "" returned a very random number.
+
+	* The FPLSEND_GETSYMBOL_* didn't work properly if the hash table size
+	  was altered.
+
+13.3	* fplAddVariable() that added a string with NULL as default string
+	  did crash.
+
+13.2	* ltostr() didn't work properly on numbers like 1<<31...
+
+	+ [Amiga] FPLdb is much improved. It's now cabable of showing
+	  function return codes and a few other things as well as it can be
+	  controlled through ARexx and even disabled/enabled.
+
+	* Setting DEBUG_MODE with the fplReset() or in the fplInit() will now
+	  switch on/off "global" debug mode. That is everything will be run in
+	  debug mode. Previously, they only switched it on and off just like
+	  the 'debug()' function, which made them pretty useless...!
+
+13.1	* External functions that were expected to return a string, but
+	  didn't, could make FPL rather confused... I even improved
+	  interpreting speed pretty much when strings are returned from
+	  external functions.
+
+	: [Amiga]
+	  FPLTAG_LOCKUSED is removed. There is no substitute, but I doubt
+	  anyone will ever miss it...
+
+	* sprintf() now has some better checks when using more %-codes than
+	  parameters
+
+	+ 'rename' can change name of already existing identifiers. By using
+	  this the right way, you can alter the working of *any* already
+	  written or added function in FPL. Even external or internal ones!!
+
+	+ exists() returns information about the presence of identifiers.
+
+13.0	+ sscanf() is here!
+
+	+ [Amiga]
+	  FPLdb version 2 is introduced and needed if you want to debug FPL
+	  from now on! A couple of new switches and cleaned code have gotten
+	  be started to create a better and more advanced debugger.
+
+12.6	+ The interpreter makes much better assumptions and errors now about
+	  functions that return optional types. An example, we have a function
+	  called 'myown()' that has been added by the program to return
+	  optional string or int. Previously, uses like this caused problems:
+		int a;
+		a = myown("return string!"); /* this returned a string */
+
+	* Removed an error that would occur when an integer was returned
+	  from a function returning optional type, when FPL expected a string!
+
+	* The following little program stopped with 'Out of memory error!':
+	  string hi()
+	  {
+	     string p;
+             return p;
+          }
+	  hi();
+
+	* Using variable references as parameters to inside functions could
+	  mess up the return-value of the function!!!
+
+12.5	* A string that ended with a single backslash confused
+	  fplConvertString().
+
+12.4	+ fplStrtol() now accepts NULL in the third parameter.
+
+12.3	* Accessing the first column of an empty string will now generate
+	  an "Illegal string index error" instead of simply crashing...
+
+	* If sprintf() didn't make a string (or a zero-length), FPL could
+	  write to a stupid address (0x000004) ...
+
+12.2	- FPL now keeps a good control of the "break level". Thereby, it can
+	  alert much better on breaks with too high level and other illegal
+	  uses (like using break outside of loops and switches).
+
+	* 'continue' is now harder to abuse.
+
+	* FPL could loose track of the real line number when passing if()-
+	  statements that wasn't evaluated.
+
+	+ Added the FPLSEND_GETVERSION and FPLSEND_GETREVISION to enable
+	  the FPL library user to get FPL version and revision number.
+
+12.1	* Using nested switch()-statements actually had a high fail ratio
+	  since FPL would find the 'case' - labels of "inner-level"
+	  switch()es !
+
+	+ Included all the xxxxxxxTags() functions to the actual library
+	  instead of have them as separate stubs. Not made for the Amiga
+	  library.
+
+12.0	+ The previous feature that enables string merging like:
+		string a = b + c;
+	  where b and c are strings, is re-implemented!
+
+11.6	* 'continue' within statements that wasn't within braces didn't
+	  work as it should!
+
+11.5	* [Amiga] The internal table of funclibs did not survive after the
+	  program that opened a funclib quit! Now it does...
+
+	* [Amiga] Added RESETOPTIONS to the compiler flags to ignore all those
+	  *stupid* ENV:sc/SCOPTIONS used by people who try to compile FPL...
+
+11.4	* "\x" didn't work with uppercase letters in the hexadecimal number!
+
+	* Accessing an array illegally when *not* declaring, made FPL to
+	  strcpy() a NULL pointer...
+
+	* Assigning a string variable like
+		string a,b;
+		a = b
+	  where 'b' never was initialized could lead to 'out of memory'!
+
+11.3	+ stristr(), stricmp() and strnicmp() were added to the language!
+
+11.2	* Another small fix to break-within-switch. This is the third in a row
+	  of bugs discovered by Björn when I've been planning to make a public
+	  release...!
+
+	* Argh!! Forgot to check if it really was a break that broke a
+	  switch(), which made strange results on i.e return()s from within
+	  switch()es...!
+
+	* Breaks within a switch() could get left after the switch() statement
+	  so that one 'break' happened to break out of several levels!
+
+	* Using 'break' with a too high level parameter now results in the
+	  (much better) 'illegal break' error message...
+
+11.1	Released to Björn for test use in FrexxLink
+
+	* The 'break' keyword didn't work in a program like:
+	  while(1) {
+	    if(1) {
+              if(1)
+                break;
+            }
+            /* shouldn't reach this but did previously! */
+          }
+	
+11.0	Pre-release only used by a minimum of people.
+
+	* [Amiga] funclib/lib.c didn't remove the "libTest2" function on exit!
+
+	* #pragma nocache was no real success if FPL decided that the program
+	  was subject for caching...
+
+	* Cleaned up a bit more, and made more functions return proper error
+	  messages.
+
+	+ Seven new error messages have been added to help debugging FPL
+	  programs. The new ones are more specified of what exactly the error
+	  is. Of course I remade a few details to make them use the new
+	  errors. Read the updated (at last) chapter in the documentation!
+
+10.7	* Accessing a string array with i.e foobar[-1] now generates
+	  'illegal array "foobar" error!' instead of previous 'out of reach
+	  error!'.
+
+	* The since a long time known, but very-hard-to-find bug that made FPL
+	  loose control of the line number in error messages is now removed.
+	  It occured in situations like:
+
+		if/while ( FALSE )
+		  STATEMENT;
+
+          The newlines between 'STATEMENT' and the following statement were
+	  then counted twice...!
+
+	* A single exported/global string variable that was assigned at
+	  declaration time wasn't properly taken care of. Later use of the
+	  variable could lead to crashes!
+
+10.6	* FPLTAG_KIDNAP_CACHED was fixed and should be working now!
+
+	- Since we're planning a release (software based on FPL) on OS/2, all
+	  packages from now is gonna be multi-platform. It means a few things:
+	  o ASCII formatted docs will be included as well as the .guide ones.
+	  o Binary versions of FPL.DLL (OS/2) and FPLlib.so (Intel SVR4 UNIX)
+	    will be included.
+	  o The archive directory tree now holds the directories bin_amiga/,
+	    bin_os2/ and bin_svr4/.
+
+10.5	* Assigning a global/exported string variable after it had been
+	  "globalfied", did cause a crash!
+
+	* Deleting a global/exported variable with DelIdentifier was not
+	  healthy...
+
+	+ Made both fplDealloc() and fplDealloca() capable of freeing memory
+	  allcated both with fplAlloc() and fplAlloca(). They're now virtually
+	  the same function.
+
+	+ Introducing the FPLREF_ARRAY_RESIZE... This tag to fplReference()
+	  enables the host program to resize the array to which a reference
+	  was sent as parameter to a function. I have to increase the library
+	  version number for the next public/developer release!
+
+	* Using 'resize' on arrays that were declared as global/exported
+	  did result in system crashes!
+
+	* Improved the error message when trying to refer to non-existing
+	  or negative array fields. Could previously easily contain the wrong
+	  variable name.
+	  Did the same to illegal 'resize' operations.
+
+10.4	+ Added FPLSEND_GETRETURNINT, which returns a pointer to the value
+	  returned by a program. If no value was returned, this will return
+	  NULL.
+
+	* Fixed the fplExecuteXXXXXX() invokes that allow strings to get
+	  returned so that the string pointer is set to NULL if a string
+	  wasn't returned. Previous versions didn't touch the pointer in such
+	  situations.
+
+10.3	* Fixed another small detail with the nested runnings and failure.
+	  Nobody has experienced any trouble with it though.
+
+10.2	* Execution of nested files (and an error in a nested level) could
+	  lead to files being cached accidentaly, which could lead to serious
+	  confusion!
+
+10.1	+ FPL now offers external variables to be added just like functions
+	  have been a long time. With the function fplAddVariable(), they
+	  will be added and recognized instantly by FPL. Added variables are
+	  always read-only, and all reads from them causes the interface
+	  function to get called as in a regular external function case, and
+	  the returned value (with 'fplSend()') will be the result of the
+	  variable read. The fplArgument struct has been extended with an
+	  extra member which will hold the default variable result, the result
+	  that will be the variable contents if the interface function doesn't
+	  return anything.
+
+	* Fixed some serious errors when FPL found 'const' variables. It did
+	  not prevent some changes, and some changes caused peculiar error
+	  messages!
+
+	* Fixed a bug in the fplAllocString() which made the fplReference()
+	  or fplSend() where the string could be used to cause damage to
+	  the system's memory list.
+
+10.0	FPL VERSION 10
+	~~~~~~~~~~~~~~
+	We've now reached version 10. The version number increase is because
+	of the following reasons:
+
+	+ The expression parsing is now 100% C compatible to the very last
+	  detail AFAIK!! Expressions like the following are now treated the
+	  C-style way:
+
+	  1) if(a++ && b++)...  the right part is only executed if the left
+	     part was evaluated TRUE
+
+	  2) if(a++ || b++)... the right part is only executed if the left
+	     part was evaluated FALSE
+
+	  3) if(a ? b++ : c++ )... "b++" is only executed if 'a' evaluates
+	     TRUE, and "c++" if 'a' evaluates FALSE
+
+	+ FPL now allows array references sent as parameters to functions. Such
+	  parameters are declared as "int *array[]" or simply "int *[]" for
+	  integer arrays.
+
+	+ fplReference() now features:
+	  FPLREF_TYPE_ARRAY is now a valid type bit returned by the FPLREF_TYPE
+	  tag.
+	  FPLREF_ARRAY_ITEM lets you set which array item you want to read or
+	  write. The strings/ints are still read with the previous tags for
+	  those purposes (or the new ones described below).
+	  FPLREF_ARRAY_INFO gives you information about the looks of the
+	  referenced array variable.
+	  FPLREF_SET_MY_STRING makes a normal string valid as new string for
+	  a referenced variable. The length can be set with...
+	  FPLREF_SET_MY_STRLEN defines the length of the string set with the
+	  tag above.
+
+	+ fplInit() features this new tag:
+	  FPLTAG_PREVENT_RUNNING_SAME which will make FPL to abort any tries
+	  to run a program that already is cashed. The FPLTAG_REREAD_CHANGES
+	  tag still works fine with this though.
+
+	+ fplSend() features these new tags:
+	  FPLSEND_RESULT which will give fplSend() a long to store results in.
+	  FPLSEND_IS_FILE_CACHED will give information regarding if the
+	  specified file is cached (held in memory) or not.
+
+	+ sprintf() is a new FPL function. Features all ANSI C %-codes plus
+	  a few additional ones:
+	  %o - octal number
+	  %b - binary number
+	  %n - number of characters
+	  %P - pointer shown with uppercase letters

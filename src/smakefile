@@ -1,0 +1,125 @@
+# $VER: fpl.library makefile v4.0 95-07-08
+
+########################################################################
+#                                                                      #
+# fpl.library - A shared library interpreting script langauge.         #
+# Copyright (C) 1992-1996 FrexxWare                                    #
+# Author: Daniel Stenberg                                              #
+#                                                                      #
+# This program is free software; you may redistribute for non          #
+# commercial purposes only. Commercial programs must have a written    #
+# permission from the author to use FPL. FPL is *NOT* public domain!   #
+# Any provided source code is only for reference and for assurance     #
+# that users should be able to compile FPL on any operating system     #
+# he/she wants to use it in!                                           #
+#                                                                      #
+# You may not change, resource, patch files or in any way reverse      #
+# engineer anything in the FPL package.                                #
+#                                                                      #
+# This program is distributed in the hope that it will be useful,      #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of       #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.                 #
+#                                                                      #
+# Daniel Stenberg                                                      #
+# Ankdammsgatan 36, 4tr                                                #
+# S-171 43 Solna                                                       #
+# Sweden                                                               #
+#                                                                      #
+# FidoNet 2:201/328    email:dast@sth.frontec.se                       #
+#                                                                      #
+########################################################################
+
+LIBRARY = fpl.library	# library version
+SFPL	= SFPL		# library using executable
+
+#
+# These flags build the .library:
+#
+FLAGS = RESETOPTIONS STRINGMERGE UNSIGNEDCHAR NOSTKCHK NOSTANDARDIO DATA=NEAR\
+NOVERSION DEFINE=AMIGA DEFINE=SHARED LIBCODE NOMULTIPLEINCLUDES\
+DEFINE=DEBUGMAIL\
+OPTIMIZE
+DEBUG=S 
+#DEFINE=DEBUG
+
+ASMFLAGS = IDIR=Include: ASSEMBLER
+LINKFLAGS = SC SD
+LIBS = LIB:sc.lib
+OBJS = libent.o libinit.o script.o numexpr.o hash.o statement.o liballoc.o\
+       memory.o frontend.o debug.o reference.o sprintf.o scan.o sscanf.o\
+       compile.o
+CC = sc
+ASM = sc
+LINK = slink
+
+all: $(LIBRARY) $(SFPL)
+
+$(LIBRARY): $(OBJS) smakefile
+      slink with <<
+LIBFD fpl.fd 
+to $(LIBRARY)
+FROM  $(OBJS)
+# lib:libent.o lib:libinit.o
+lib $(LIBS)
+noicons
+SD SC
+STRIPDEBUG
+libid "fpl.library 14.10 (15.11.96)"
+libversion 14 librevision 10
+<
+	copy $(LIBRARY) LIBS: CLONE
+	copy FPL.h /include/libraries/ CLONE
+	copy reference.h /include/FPL/ CLONE
+	copy FPL.h include:libraries/ CLONE
+
+$(SFPL): caller.o
+	$(LINK) SC SD FROM LIB:c.o caller.o to $(SFPL) LIB $(LIBS)
+  
+script.o: script.c script.h FPL.h
+	$(CC) $(FLAGS) $<
+
+numexpr.o: numexpr.c script.h FPL.h
+	$(CC) $(FLAGS) $<
+
+hash.o: hash.c script.h FPL.h
+	$(CC) $(FLAGS) $<
+
+statement.o: statement.c script.h FPL.h
+	$(CC) $(FLAGS) $<
+
+frontend.o: frontend.c script.h FPL.h
+	$(CC) $(FLAGS) $<
+
+libinit.o: libinit.c
+	$(CC) $(FLAGS) $<
+
+liballoc.o: liballoc.a
+	$(CC) $(FLAGS) $(ASMFLAGS) $<
+
+libent.o: libent.a
+	$(CC) $(FLAGS) UNDERSCORE $(ASMFLAGS) $<
+
+memory.o: memory.c script.h
+	$(CC) $(FLAGS) $<
+
+debug.o: debug.c FPL.h script.h
+	$(CC) $(FLAGS) $<
+
+reference.o: reference.c reference.h FPL.h script.h
+	$(CC) $(FLAGS) $<
+
+sprintf.o: sprintf.c FPL.h script.h
+	$(CC) $(FLAGS) $<
+
+sscanf.o: sscanf.c FPL.h script.h
+	$(CC) $(FLAGS) $<
+
+scan.o: scan.c FPL.h script.h
+	$(CC) $(FLAGS) $<
+
+compile.o: compile.c script.h compile.h
+	$(CC) $(FLAGS) $<
+
+caller.o: caller.c reference.h FPL.h /include/pragmas/FPL_pragmas.h
+	$(CC) STRINGMERGE UNSIGNEDCHAR DATA=NEAR NOVERSION\
+DEFINE=AMIGA DEFINE=SHARED DEFINE=SFPL IGNORE=183 $< DEBUG=S

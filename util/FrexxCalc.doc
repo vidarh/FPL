@@ -1,0 +1,20 @@
+				 FrexxCalc 5.1
+				 =============
+
+  FrexxCalc is Copyright (C) by FrexxWare 1992-1994 and is freely distributed
+for non-commercial purposes only.
+
+USAGE
+  FrexxCalc [expression]
+
+FUNCTION
+  FrexxCalc reads a C style expression from the command line and prints the
+  result.
+
+EXAMPLE
+  FrexxCalc 2*0x0b+010
+    outputs:
+  30
+
+REQUIREMENT
+  fpl.library 5.0+ is required, nothing less than 8.5 is recommended!

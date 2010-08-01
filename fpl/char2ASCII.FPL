@@ -1,0 +1,7 @@
+auto string text; /* 'auto' makes the variable non-global! */
+text=getstring("Enter a character: "); /* get number from user */
+if(strlen(text)==1)
+  /* output the character ASCII code! */
+  printf("%c is ASCII code %d\n", text[0], text[0]);
+else
+  printf("*One* character is required!\n");

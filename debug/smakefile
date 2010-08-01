@@ -1,0 +1,69 @@
+# $VER: fplfb smakefile v1.0
+
+########################################################################
+#                                                                      #
+# fpl.library - A shared library interpreting script langauge.         #
+# Copyright (C) 1992-1994 FrexxWare                                    #
+# Author: Daniel Stenberg                                              #
+#                                                                      #
+# This program is free software; you may redistribute for non          #
+# commercial purposes only. Commercial programs must have a written    #
+# permission from the author to use FPL. FPL is *NOT* public domain!   #
+# Any provided source code is only for reference and for assurance     #
+# that users should be able to compile FPL on any operating system     #
+# he/she wants to use it in!                                           #
+#                                                                      #
+# You may not change, resource, patch files or in any way reverse      #
+# engineer anything in the FPL package.                                #
+#                                                                      #
+# This program is distributed in the hope that it will be useful,      #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of       #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.                 #
+#                                                                      #
+# Daniel Stenberg                                                      #
+# Ankdammsgatan 36, 4tr                                                #
+# S-171 43 Solna                                                       #
+# Sweden                                                               #
+#                                                                      #
+# FidoNet 2:201/328    email:dast@sth.frontec.se                       #
+#                                                                      #
+########################################################################
+
+
+CFLAGS = debug=S
+DB_TARGET = FPLdb
+SEND_TARGET = dbsend
+
+LIBS = LIB:sc.lib LIB:amiga.lib
+
+DB_OBJS = FPLdb.o simplerexx.o
+
+SEND_OBJS = dbsend.o
+
+all: $(DB_TARGET)
+
+$(DB_TARGET): $(DB_OBJS)
+	slink with <<
+	TO $(DB_TARGET)
+	FROM LIB:c.o $(DB_OBJS)
+	LIB $(LIBS)
+	SMALLCODE
+	SMALLDATA
+	NOICONS
+	#STRIPDEBUG
+	<
+
+$(SEND_TARGET): $(SEND_OBJS)
+	slink with <<
+	TO $(SEND_TARGET)
+	FROM LIB:c.o $(SEND_OBJS)
+	LIB $(LIBS)
+	SMALLCODE
+	SMALLDATA
+	NOICONS
+	#STRIPDEBUG
+	<
+
+FPLdb.o: FPLdb.c debugmail.h /src/script.h
+dbsend.o: dbsend.c debugmail.h /src/script.h
+simplerexx.o: simplerexx.c

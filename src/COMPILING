@@ -1,0 +1,151 @@
+/************************************************************************
+ *                                                                      *
+ * fpl.library - A shared library interpreting script langauge.         *
+ * Copyright (C) 1992-1996 FrexxWare                                    *
+ * Author: Daniel Stenberg                                              *
+ *                                                                      *
+ * This program is free software; you may redistribute for non          *
+ * commercial purposes only. Commercial programs must have a written    *
+ * permission from the author to use FPL. FPL is *NOT* public domain!   *
+ * Any provided source code is only for reference and for assurance     *
+ * that users should be able to compile FPL on any operating system     *
+ * he/she wants to use it in!                                           *
+ *                                                                      *
+ * You may not change, resource, patch files or in any way reverse      *
+ * engineer anything in the FPL package.                                *
+ *                                                                      *
+ * This program is distributed in the hope that it will be useful,      *
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of       *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.                 *
+ *                                                                      *
+ * Daniel Stenberg                                                      *
+ * Ankdammsgatan 36, 4tr                                                *
+ * S-171 43 Solna                                                       *
+ * Sweden                                                               *
+ *                                                                      *
+ * FidoNet 2:201/328    email: Daniel.Stenberg@sth.frontec.se           *
+ *                                                                      *
+ ************************************************************************/
+
+COMPILING
+=========
+
+ All versions:
+ -------------
+ FPL has been developed on Amiga, AIX, SunOS and Solaris using SAS/C
+development system version 6, the internal AIX `cc' compiler combined with
+the `xcdb' debugger and GNU tools.
+
+ Using SAS/C on Amiga and the preferably 'gcc' (or standard `cc') under UNIX
+will compile just nice! Use 'ANSI' option with any other compiler to achieve
+best possible result!
+
+ If you add or change anything major when porting, please send a copy of that
+to me to apply in the original FPL package.
+
+ All versions are easily tested. Try running `SFPL demo.FPL' and if that
+works, you know that _most_ of FPL is working.
+
+ Using the `DEBUG' define activates a lot of extra checking and debugging
+possibilities. Combined with the MEMORY_COOKIE define in "script.h", a good
+piece of memory writing checks is performed. The `MEMORY_QUEUE' enbles the
+memory queuing system. (Though I've found out some kind of bug somewhere in
+the code within the DEBUG symbol... :()
+
+ FPL runs and depends a lot on eight bit characters. Other character sets is
+easily supported by changing the defines in "script.h", but modifying it to
+other than eight bit characters will give you hard and boring work!
+
+ Compilers not supporting ANSI C will have a hard time compiling this!
+
+ Amiga version:
+ --------------
+ The development of this started using SAS/C v5.10 and since that lacked
+proper library debugging features, I inserted some `#ifdef's and `#define's
+in the source so that I could create both a library version and a version
+done as a common executable for debugging. As you can see in the Makefile,
+the define `SHARED' constructs the library.  Just a 'make' will create the
+library, while a 'make FPL' will create the executable.
+
+ The library version is using low level assembler routines for stack
+allocating/expanding/swapping (I got initial help from Kjell Ericson to make
+those as good as they are today).
+
+ Some people have experienced troubles when trying to compile this. I can't
+understand why!
+
+ __inline has been used in a few places to make the `Global Optimizer' inline
+those functions in the code.
+
+ If you're trying to compile this without the SAS/C compiler, you will hit
+some troubles, but nothing that you shouldn't be able to overcome!
+
+ UNIX versions:
+ --------------
+ I have compiled FPL under a lot of different UNIXes without any kind of
+problems, though I have a lot of projects to work on and my time is limited
+and I'll bet there are more UNIX flavours than a signed char hand handle...!
+
+ I spent many hours on this project writing the program under UNIX. The
+source features a small number of `#ifdef's to make this possible.  The UNIX
+version I've used mainly is AIX, which is a mix of BSD and SVR4, OSF/1 builts
+heavily upon it. The code is easily ported into other UNIX environments. The
+UNIX version can also be compiled into a shared library!
+  'make -f Makefile.SVR4' will create the shared library 'libfpl.a' (in good
+old UNIX naming standard), 'make -f Makefile.SUNOS' creates a static lib
+version for us under sunos.
+
+ OS/2 version:
+ -------------
+ Since the 12th of February 1994, I include makefile.os2 and "FPL.def" file
+in the FPL package to enable compiling FPL into a DLL (shared library) under
+OS/2. The IBM C-Set/2 compiler does complain a *LOT* on using bitwise
+operators on signed integers, but what can I do? I want bitwise operators on
+signed integers!!
+
+ DOS version:
+ ------------
+ I actually thought of making one. Then I tried Turbo C and discovered that
+it doesn't look upon a single byte 10 as a newline character. That, plus the
+fact that DOS compilers too often think in terms of 16-bit made me skip all
+further efforts. Later modifications of FPL such as turning `int' into `long'
+throughout the entire source code has enhanced DOS porting possibilities, but
+is there really anyone who can do anything _serious_ with MS-DOS?!?.
+
+ New versions:
+ -------------
+ Use `#ifdef's extensively and do not modify any part of the source code that
+do not affect the system you're fixing it to run under.
+
+MAKEFILE
+========
+
+  This package includes specific makefiles for different options:
+ 
+smakefile -     for the Amiga SAS/C compiler
+Makefile.OS2 -  for the OS/2 version,
+Makefile.SVR4 - makes a shared library under any SVR4 UNIX with 'gcc',
+Makefile.FILE - compiles with 'gcc' into simple link-objects
+Makefile.SUNOS - makes a proper lib under sunos.
+Makefile.HPUX - compiles on a HP box
+
+SOURCE CODES
+============
+
+ The source has been coded with great thought of program performance. It's
+not easy to understand but I have done my best adding comments all over the
+place. If you try to read and/or understand it, get in touch for better
+explanations to things...
+
+INCLUDE FILES
+=============
+
+ The "FPL.h" is in two places in the archive, but that is because of the
+convinience of having it in the source directory and I really couldn't
+leave it out of the include directory tree!
+ The include tree is very Amiga infected, I know, but I don't have the energy
+to change that fact at the moment. Following updates might change!
+
+ When using the Amiga version you have to copy the files from the include
+directory to INCLUDE:. If you're using any other system, those files won't be
+needed.

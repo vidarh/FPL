@@ -1,0 +1,72 @@
+				#############
+				FUTURE of FPL
+				#############
+
+  Here follows a list with some ideas for the future of FPL. These are the
+items that feel are most important (in a very approximate order of
+importance):
+
+* macro-kind-of keyword is planned, should work pretty much as the C
+  preprocessor instruction #define.
+
+* [Amiga] FPL symbolic debugger. This will be able to use together with any
+  software using FPL! I think I will get someone to help me code this...
+  The embryo to this is already shipped in the version 9 package!
+  
+* Real-time interpretation enhancement. Store information about the
+  interpretation so that next time the same code gets excuted, it will run
+  faster.
+
+* Support array declaration and assigning without speciying array size (as in
+  regular C). I.e, "int array[]={0, 2, 3, 4, 12};"
+
+* FPLTAG_HOOK_LOAD, replace FPL's load functions. Enable compressed/encrypted
+  programs or add path searching for programs or...
+
+* 'enum' support.
+
+* Multithread support. Run multiple FPL programs simultanously, sharing global
+  data. (Probably done by adding fplAddThread() and fplDelThread().) I still
+  haven't got a system independent resource locking method, and will probably
+  *not* find one. Locks will be done in different ways depending on the OS
+  capabilties.
+
+* some kind of locale support to make error string appear in the user's
+  native language. Amiga has wonderful support (V38+) for this, but how
+  should I do this system independent?
+
+* Structures.
+  
+* [Amiga] ARexx library emulator that can call and take advantage of ARexx
+  libraries (libraries done to be called from ARexx). Will most likely be
+  implemented as a funclib.
+
+* Make 'char' and 'short' variables and arrays take no more memory than
+  they should. (8 resp. 16 bits each.)
+  
+* Pointers will be implemented. At first only to all the numeric
+  variable types that exist today, 'int', 'long', 'char' and 'short'.
+  Of course any number of pointer levels. such as "char *********p;".
+  
+* malloc() and a lot of other clean and pure C library functions
+  will be added.
+  
+* Float variables and expressions
+  
+* Reading SAS/C pragma files to be able to call AmigaDOS shared
+  libraries straight from FPL.
+  
+* Storing all local symbol information in some kind of simulated
+  stack to be able to call direct function calls to absolute addresses
+  in memory to functions refering to data stored in the FPL program.
+  Adding such functions will have to be done in some kind of
+  OpenLibrary() way, or like an OS/2 and UNIX shared library function
+  access solution (setting up a function that associates function
+  identifiers with absolute memory addresses). An already working
+  software with FPL interface should be able to call another compiled
+  program using this function. No interpreting overhead!!!
+
+* Preprocessing of all FPL-files with my own ANSI C complient preprocessor!
+
+* Now we should be able to interpret any C program with only a small
+  preparation.

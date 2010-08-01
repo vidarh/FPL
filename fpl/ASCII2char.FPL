@@ -1,0 +1,7 @@
+auto int a; /* 'auto' makes the variable non-global! */
+a=getint("Enter decimal number (0-255): "); /* get number from user */
+if(a>=0 && a<256)
+  printf("ASCII %d makes character '%c'\n", a, a); /* output the character! */
+else
+  printf("That is not a valid ASCII code!\n");
+

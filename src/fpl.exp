@@ -1,0 +1,15 @@
+#!
+fplAddFunction
+fplAlloc
+fplAlloca
+fplConvertString
+fplDealloc
+fplDealloca
+fplDelFunction
+fplExecuteFile
+fplExecuteScript
+fplFree
+fplGetErrorMsg
+fplInit
+fplReset
+fplSend

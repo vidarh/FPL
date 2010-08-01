@@ -1,0 +1,15 @@
+export int Lazer()
+{
+  return 1994;
+}
+
+
+if(!openlib("func", 2)) {
+
+  output( libTest() );
+
+  closelib("func");
+} else
+  output("Failed to open the \"func\" funclib!\n");
+
+return;

@@ -1,0 +1,56 @@
+##base _FPLBase
+##bias 30
+************************************************************************
+*                                                                      *
+* fpl.library - A shared library interpreting script langauge.         *
+* Copyright (C) 1992-1994 FrexxWare                                    *
+* Author: Daniel Stenberg                                              *
+*                                                                      *
+* This program is free software; you may redistribute for non          *
+* commercial purposes only. Commercial programs must have a written    *
+* permission from the author to use FPL. FPL is *NOT* public domain!   *
+* Any provided source code is only for reference and for assurance     *
+* that users should be able to compile FPL on any operating system     *
+* he/she wants to use it in!                                           *
+*                                                                      *
+* You may not change, resource, patch files or in any way reverse      *
+* engineer anything in the FPL package.                                *
+*                                                                      *
+* This program is distributed in the hope that it will be useful,      *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of       *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.                 *
+*                                                                      *
+* Daniel Stenberg                                                      *
+* Ankdammsgatan 36, 4tr                                                *
+* S-171 43 Solna                                                       *
+* Sweden                                                               *
+*                                                                      *
+* FidoNet 2:201/328    email:dast@sth.frontec.se                       *
+*                                                                      *
+************************************************************************
+fplAddFunction(anchor,name,id,ret,param,tags)(A0/A1/D0/D1/A2/A3)
+fplDelFunction(anchor,name)(A0/A1)
+fplExecuteFile(anchor,name,tags)(A0/A1/A2)
+fplExecuteScript(anchor,array,size,tags)(A0/A1/D1/A2)
+fplFree(anchor)(A0)
+fplGetErrorMsg(anchor,errnum,buffer)(A0/D0/A1)
+fplInit(function,tags)(A0/A1)
+fplReset(anchor,tags)(A0/A1)
+fplSend(anchor,tags)(A0/A1)
+fplAlloc(anchor,size)(A0/D0)
+fplDealloc(anchor,pointer)(A0/A1)
+fplConvertString(anchor,convert,buffer)(A0/A1/A2)
+fplAlloca(anchor,size)(A0/D0)
+fplDealloca(anchor,pointer)(A0/A1)
+fplAllocString(anchor,size)(A0/D0)
+fplFreeString(anchor,pointer)(A0/A1)
+fplOpenLib(anchor,name,version,flags)(A0/A1/D0/D1)
+fplCloseLib(anchor,name,flags)(A0/A1/D0)
+* From version 8:
+fplStrtol(string,base,end)(A0/D0/A1)
+fplLtostr(anchor,base,num)(A0/D0/D1)
+* From version 9:
+fplReference(anchor,reference,tags)(A0/A1/A2)
+* From version 10:
+fplAddVariable(anchor,name,id,type,default,tags)(A0/A1/D0/D1/A2/A3)
+##end

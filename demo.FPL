@@ -1,0 +1,392 @@
+/***************************************************************************
+
+ **   $Filename: demo.FPL $
+ **   $Release: 13.2 $
+ **   $Date: 95/07/23 $
+ **
+ **   (C) Copyright 1992 - 1995 by FrexxWare
+ **       All Rights Reserved
+
+****************************************************************************
+
+     >>>>>> Frexx Programming Language (FPL) demonstration program <<<<<<
+			   Author: Daniel Stenberg.
+
+****************************************************************************
+
+ FPL is an interpreting, library based programming language designed to be
+ flexible and easy to insert in any software that needs some kind of
+ batch/macro control.
+
+ FPL is a complete programming language very similar to C. (Just look at
+ this program example!)
+
+ FPL.library lets the software programmer define functions that FPL should
+ accept. The library will call a function in the software whenever any of
+ these functions are discovered.
+
+ In this example, the printf() function is a such function. To be able to
+ run this example you must use the "src/SFPL" program. (Look at the code in
+ caller.c and see how simple it is to implement.) This example is working with
+ FPL version 9+.
+
+ FPL is freely distributable for non-commercial purposes only, including
+ extensive documentation and source code.
+
+ ***************************************************************************
+ *
+ * Prototype all function we'll use:
+ */
+
+#pragma cache /* pragma using little example! */
+
+void strings();
+void integers();
+void mix_them();
+void arrays();
+int expressions();
+void conditions();
+void loops();
+void constants();
+void locals();
+void recursive();
+void functions();
+export void arg_functions(); /* make this global system-wide */
+
+typedef long LONG; /* good old Commodore habit! */
+
+LONG label(int);
+LONG test(int);
+
+LONG setvar(int *);
+LONG printint(int);
+LONG double2(int a) /* declare before use instead of prototype! */
+{
+  return a*2;  // with or without parentheses!
+}
+
+int ninja=1;
+export int ninjax=0;
+auto loop;
+
+/***************************************************************************
+ *
+ * Main program part coming up:
+ */
+
+do {
+
+  strings();	// How to use strings.
+  integers();	// How to use integers.
+  mix_them();	// How to mix strings and integers.
+  arrays();	// How to use arrays.
+  //expressions();// How to write expressions.
+  conditions();	// How to check conditions.
+  loops();	// How to loop.
+  constants();	// How to write constants.
+  locals();	// How to use local variables.
+  recursive();	// How to recurse.
+  functions();	// How to use the functions.
+  arg_functions(); // How to send parameters to your own functions.
+} while(loop++<10);
+exit;
+
+/***************************************************************************
+ *
+ * Here follows a subroutine featuring some of the string expression
+ * facilities that FPL includes:
+ */
+
+void strings()
+{
+  string a;				/* declaration of a string   */
+  string b="Written ";			/* declaration and assign    */
+  string c[2];				/* string array declaration  */
+  string d="\x65\157";			/* hexadecimal + octal ASCII */
+  a="bb";				/* string variable assign    */
+  a[1]='y';				/* single character access!  */
+  b+=a;					/* string appending          */
+  c[0]={"Daniel",
+        "Stenberg"};			/* array assigning           */
+
+  printf("%s %s %s ", b, c[0], c[1]);	/* display result            */
+}
+
+/***************************************************************************
+ *
+ * Here follows a subroutine featuring some of the integer handlings that
+ * can be done:
+ */
+
+void integers()
+{
+  int a;				/* integer declaration 		*/
+  int b=200;				/* declaration assign 		*/
+  int c[2]={-25, 1234};			/* array declaration and assign */
+  a=10;					/* integer variable assign      */
+  c[0]+={2019, 758};			/* compound array assign	*/
+
+  printf("%d - %d!\n", c[1], c[0]);	/* display the contents of c[0-1] */
+}
+
+/***************************************************************************
+ *
+ * Numerical expressions can be converted to strings by using ltostr() or
+ * itoa(). 
+ */
+
+void mix_them()
+{
+  string a="Copyright ", c;		/* two string variables */
+  int b;				/* one integer variable */
+
+  b=a[0];				/* get ASCII code of column 2 */
+
+  printf("%s%s by ", a, ltostr(b*97+30+022, 16));  /* display result */
+}
+
+/***************************************************************************
+ *
+ * FPL supports multi dimensional arrays (max 40 dimensions though):
+ */
+
+void arrays()
+{
+  int c[5][2]={
+    {2, 0},
+    {3, 1}
+  };
+  int a[25]={0, 1, 2, 3, 4, 5, 6};	/* declaration assign    */
+  string b[4];
+
+  a[12]^={3, 2, 1, 0};			/* array compound assign */
+
+  resize a[10];				/* array resizing        */
+
+  output(b[0]={"FPL", "is", "Copyright by", "FrexxWare!"});
+  output("\n");
+}
+
+/***************************************************************************
+ *
+ * Expressions are very extensible in FPL. It features all ANSI C operators
+ * and has 100% operator precedence compatibility:
+ */
+
+int expressions()
+{
+  int a=128, b=3, c, d;
+  string out;
+
+  c=~(a>>b)+2*b-a++/50 & (d=a*2-1); 	/* complex formula */
+
+  c^= (2^3&3+a)%c;			/* compound assign */
+
+  output(d = c---a-b*10);		/* output integer! */
+  output("% ");				/* output string! */
+  return d;
+}
+
+/***************************************************************************
+ *
+ * Conditions are used just as i C.
+ */
+
+void conditions()
+{
+  int a=11;
+  switch( expressions() ) {
+    case 99:
+      output("Turbo pascal");
+      break;
+
+    case 100:
+      output("ANSI C");
+
+    default:
+      output(" operator ");       
+  }
+  if(a==11)
+    output("compliance!\n");
+  else
+    output("failure!\n");
+}
+
+
+/***************************************************************************
+ *
+ * Loops are used just as in C. (While has been improved with else support
+ * and break with a level option!):
+ */
+
+void loops()
+{
+  int a, b;
+  for(a=0; a<10; a++) {
+    int Bninja;
+    output("-");
+    b=a;
+    while(b<5)
+      b++;
+    else {
+      output("Very "		/* Strings in         */
+	     "easy"		/* several parts      */
+	     " implemented, "); /* just as in C!      */
+	/* This upper thing is a 5.3+ feature! */
+      break;			/* break out of loop! */
+    }
+  }
+  do {
+    if(++b<10)
+      continue;
+    break;
+  } while(a);
+
+  while(1)
+    while(1)
+      while(1)
+        while(1)
+          while(1) {
+	    output("very similar to C.\n");
+	    break 5;/* break out of multiple loops! */
+	  }
+}
+
+/***************************************************************************
+ *
+ * Constants can be written in several different ways in FPL:
+ */
+
+void constants()
+{
+  int a= 010 +	  /* octal number		*/
+         0b100 +  /* binary number		*/
+         0xdead - /* hexadecimal number		*/
+         211 +	  /* common decimal number	*/
+         'A'+	  /* ASCII code			*/
+         '\t';	  /* ASCII code of control char	*/
+}
+
+/***************************************************************************
+ *
+ * Variables always exist in their declared level and in the following ones
+ * execpt when new variables are declared there with the same name:
+ */
+
+void locals()
+{
+  int a=2, b=11;	/* declare a and b here */
+  {
+    int a=3;		/* declare a here */
+    {
+      int a=4;		/* declare a here */
+      {
+        int a=5;	/* declare a here */
+        test(b);	/* jump to test and come back */
+      }			/* this removes one a variable */
+    }			/* this removes another a variable */
+  }			/* this removes yet another a variable */
+  printf("%d kinds of comments, ", a);	/* this is the original variable */
+}
+
+int test(int b)
+{
+  printf("FPL features %d internal functions\n",  b);
+}
+
+/***************************************************************************
+ *
+ * FPL is fully recursive:
+ */
+
+void recursive()/* This example shows the recursiveness by using a lot of */
+		/* unnecessary braces and from within the innermost brace */
+		/* level call itself. */
+{
+  int b;
+  label(0);
+}
+
+int label(int b)
+{
+  int a;
+  if(++b<5) {
+    while(1) {
+      {
+        {
+          {
+            {
+              {
+                label(b);
+                break;
+	      }
+            }
+          }
+        }
+      }
+    }
+  } else
+    printf("Finally we reached this point when b equals %d.\n", 2<<b);
+}
+
+/***************************************************************************
+ *
+ * FPL supplies several internal functions:
+ */
+
+void functions()
+{
+  int a, b=2, c;
+  string str1="hello", str2="world", str3="l", num="12";
+
+  a=strcmp(str1, str2);		/* compare two strings */
+  a=strncmp(str1, str2, b);	/* compare two strings a certain length */
+
+  a=strstr(str2, str3);		/* search for substring within a big string */
+
+  str3=substr(str1, 0, 3);	/* get substring */
+
+  a=atoi(num);			/* decimal string to numerical */
+
+  a=strtol(num, 16);		/* any-base string to numerical */
+
+  str3=ltostr(a, 14);		/* integer to string, base 14 */
+
+  num+="-19";			/* append to string */
+
+  c=eval(num);			/* calculate a string!!! */
+
+  a=strlen(str2);		/* length of a string */
+
+				/* absolute value of integer: */
+  printf("abs(%s) equals %d.\n", num, abs(c));
+}
+
+void arg_functions()
+{
+  long a;  // supports `long', which is the same as `int'
+  for(a=0; a<5; a++)
+    printint(double2(a)); // `inside' functions used as any other function!
+
+  setvar(&a);	// assign variable a!
+  printint(a);  // to prove it really changed!
+  printint((++ninjax, ninja++)); /* Using comma separator in functions that
+				    only wants one parameter! */
+  output("\n");
+}
+
+int setvar(int *variable) // integer variable as argument
+{
+  *variable=100; // assigns the received variable!
+}
+
+int printint(int x) // integer as argument
+{
+  printf("|%d|", x); // output the numer received!
+}
+
+/***************************************************************************
+
+		    >Copyright (C) 1992 - 1994 by FrexxWare<
+
+****************************************************************************/

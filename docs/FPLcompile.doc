@@ -1,0 +1,351 @@
+
+
+
+
+
+                                  0764e4a0-0
+
+
+                                   Version
+                                     1.0
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                         Generated with Heddley v1.1
+                      Heddley v1.1 (C) Edd Dumbill 1994
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                  - Page 1 -
+
+
+
+1.	FPL Compiler Environment Documentation
+
+                FPL Compiler Environment Documentation
+                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        FPL is (C) by FrexxWare 1992-1996. All rights reserved.
+
+  Legal Status
+  What is FPL Compiling
+  Compiling Phases
+  Compiled Format
+  Requirements
+  Installation
+  Limitations
+  File Naming Standards
+  Things to Consider
+  Using the Compiler
+  Preprocessor Instructions
+
+  Source / Compiling the Compiler
+  Authors of All This
+
+2.	Legal Status
+
+ FPL - A shared library interpreting/compiled script langauge.
+ Copyright (C) 1992-1996 by FrexxWare. All rights reserved.
+ Authors: Daniel Stenberg and Kjell Ericson. See separate section.
+
+ This program is free software; you may redistribute for non commercial
+purposes only. Commercial programs must have a written permission from the
+author to use FPL. FPL is *NOT* public domain! Any provided source code is
+only for reference and for assurance  that users should be able to compile FPL
+on any operating system he/she wants to use it in!
+
+ You may not change, resource, patch files or in any way reverse engineer
+anything in the FPL package.
+
+ This program is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.
+
+3.	What is Compiling
+
+ Compiling in general means that the source text is interpreted and converted
+into a format more easily understood and faster executed. Normally, compilers
+compile ASCII text files into machine code binary programs, using CPU
+instructions. The FPL Compiler is not like that, it compiles the standard
+ASCII text file into a FPL improved instruction set format, that is more
+easily understood and quicker read by the FPL interpreter engine.
+
+4.	Compiling Phases
+
+ The compiling is done in several different phases. This is generally not
+important to you as a user, with exception for the preprocessor phase.
+
+ The compiling always (if not disabled through a command line parameter)
+starts with "preprocessing" the source file. Preprocessing means that all
+#-instructions (like #define, #ifdef, #include, #else, etc) are resolved. See
+the Preprocessor Instructions section for detailed information about those.
+
+ The next phase is the syntax-check-phase. The entire source file is now
+scanned again and the syntax/usage is controlled and piped further into the
+next phase. Any sever misuse of the language will be discovered in this phase
+and reported to the terminal.
+
+ The actual compiling phase converts the previous source format into the new
+one. This phase will also contain all sorts of optimizing in the future.
+
+                                  - Page 2 -
+4.	Compiling Phases
+
+
+5.	Compiled Format
+
+ Compiled files include information that might be of interest for you to know
+about. It is among other things:
+
+  * Lowest FPL version required to run the program.
+
+  * Version number of the compiler that generated the program.
+
+  * File name of the original FPL program source.
+
+  * Little/bin endian information. The compiled program does only work on
+    machines with the same endian status that is stored in the compiled
+    file. If you don't know what this means and don't intend to move compiled
+    programs from one platform to another, just ignore this!
+
+  Optionally [debug] info:
+
+  * All external references gathered at one place. If this hunk is present,
+    all these names will be checked on load-time, to make sure that no
+    function in the file referes to a non-existing function/varible.
+
+  * Line number of the source file. To easier trace bugs back to the original
+    file.
+
+ One of the main gains with this gathered information is that a compiled
+program can never get executed by a too old FPL version.
+
+ With this new, compiled custom format, we have introduced a free-form way to
+improve things in FPL in the future. By allowing the compiled format to
+change, we can improve compiling and add optimizing stages as long as we can
+program them.
+
+6.	Requirements
+
+ It might require some time from you, humble user, but I've disregarded that
+simple matter in the following section! ;)
+
+ The FPL Compiler Environment doesn't require much. Hardly anything actually!
+I just think it should be pointed out here that the FPL Compiler is of no use
+whatsoever without you using one or more programs that run(s) FPL programs.
+The 'FPLc' executable program requires the 'cpp' program to be put in the
+system path before run, that's all!
+
+ NOTE: the compiler is still designed to load the entire source file into
+memory before any compiling is done, why the memory amount of your machine
+might limit the size of FPL programs possible to compile!
+
+7.	Installation
+
+ Make sure the 'cpp' executable is in the system path before FPLc is run, or
+use the 'CPP' command line option to specify the complete path to that or a
+similar preprocessing program (any C-compiler's preprocessor is likely to work
+pretty smoothly together with FPLc).
+
+8.	Limitations
+
+ Some critical uses of FPL that is supported, but not supported in C, is no
+longer suppored when FPLCompiling. The most obvious one is continuation of
+string constants without the use of a backslash character (\), as in:
+
+    string WorkedBefore = "line one
+            ----->         line two";
+
+ that will cause the preprocessor to go crazy, instead use:
+
+
+                                  - Page 3 -
+8.	Limitations
+
+    string WorksNow = "line one\
+            ----->     line two";
+
+9.	File Naming Standards
+
+ With this compiler, we have decided to set a file naming standard. We have
+decided that the default extensions used by any program that deals with FPL
+programs should be
+
+ .FPL - for uncompiled, interpreted regular ASCII text FPL sources
+
+ .FPC - for compiled, custom format FPL programs
+
+ Any other can in most cases very well be used, but these mentioned are the
+ones we recommend and those *we* will use for most of our work. The FPL
+interpreter will also feature mechanisms in which the .FPL/.FPC extentions
+will be required to enable them. That is i.e for the moment an automatic
+run-the-compiled-version-of-a-FPL-program-if-there-is-one-newer-than-the-
+FPL-source function.
+
+10.	Things to Consider
+
+* The FPL Compiler is much more 'observant' than the interpreter. Some of the
+  minor mistakes you've done in your programs and that have always worked
+  when interpreting your FPL programs may cause the compiler to spit. Be
+  aware of the fact that the interpreter never syntax check anything it
+  doesn't interpret. Rubbish in between functions are never discovered.
+
+* Typing mistakes such as spelling variable or functions names slightly
+  different than they're actually named are generally *not* discovered by the
+  compiler, but it will merely suppose it means accessing an out-of-file
+  declaration of that variable/function. Use the VERBOSE command line flag
+  for displaying external references to trap such kind of mistakes.
+
+* Exported/trans-file variables and functions are much slower to access than
+  local versions. Use local variables and functions as far as you can.
+
+11.	Using the Compiler
+
+ The FPL Compiler is only available from a shell prompt. [Amiga] Future
+versions may be WB-runnable.
+
+ Quick n' Easy
+ ~~~~~~~~~~~~~
+  fplc <file>
+
+ More Detailed
+ ~~~~~~~~~~~~~
+ Usage: FPLc [options] <file(s)>
+
+ Where available options are as follows:
+
+     COMMENTNEST   - Allow nested comments in source files.
+
+     CPP <path>    - Alter the name of the preprocessor program.
+
+     DEBUG <flag>  - Include debug info in the input. Flags available are:
+                        LINE   - source file line number info
+
+     FILES         - The rest of the command line is treated as file names.
+
+     FILE          - The next argument is a file name.
+
+     NOVERSION     - Don't display compiler version information.
+
+     NOCPP         - Run the compiler without preprocessing the input
+                     file(s).
+
+                                  - Page 4 -
+11.	Using the Compiler
+
+
+     OUTPUT <name> - Output name or directory. To specify a directory, end
+                     the name with a '/' (or ':' on Amiga).
+
+     PPOPTS <opts> - Set preprocessor-specific options (passed on to the 
+                     preprocessor invoke).
+
+     VERBOSE <flag> - Produce verbose report on the compiled code.
+                     <flag> defines which information:
+                        PASS1  - Output from Pass1
+                        PASS2  - Output from Pass2
+                        PASS3  - Output from Pass3
+                        FINAL  - Final result
+                        FULL   - Full output
+                     You may be requested to run the compiler with this
+option
+                     if you have filed us a bug report!
+
+ The order of options and file names are not important.
+
+12.	Source / Compiling the Compiler
+
+ Included in this package (or if not, available on request from any of us
+authors) is the complete source code required to build the complete compiler,
+preprocessor and optimizer.
+
+ To compile it, it should be a case of selecting which makefile that suits
+your needs/equipment best and run 'make -f <makefile>'. If you experience
+compiling errors/warnings and fix them for a particular OS/compiler/machine, I
+would very much like to get my hands on those! If you can't fix them yourself,
+ask us, we might help you if it isn't too much and we aren't under too heavy
+work-load.
+
+13.	Authors of All This
+
+ FPL is mainly written by Daniel Stenberg. I started 1992 on writing the
+interpreter and has since then continously updated and developed it. FPL has
+been successfully compiled and run under at least 10 differen OSes, and more
+are very likely to be able to run it if anyone ever wanna port it...
+
+ This compiler development would never have become reality without the
+extensive help Kjell Ericson put into the project. He wrote the "3rd" stage of
+the compiler and is still kind of "responsible" for it (developing, bug
+fixing, etc).
+
+ Linus Nielsen helped me out on the somewhat fuzzy area of expression
+optimizing. "1+A+1" actually becomes "2+A" now! ;)
+
+ Anyone out there feels like giving us a hand in this project? Just send us a
+line, you don't even have to be an Amiga developer since all FPL with compiler
+is very much multi-platform.
+
+We are available at:
+
+Daniel Stenberg
+  Snail   Ankdammsgatan 36, S-171 43 Solna, Sweden
+  Email   Daniel.Stenberg@sth.frontec.se
+  FidoNet 2:201/328
+
+Kjell Ericson
+  Email   kjer@netcom.se
+  FidoNet 2:201/328

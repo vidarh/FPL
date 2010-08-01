@@ -1,0 +1,582 @@
+NAME cpp - A FPL and C-Compiler Compatible Preprocessor. 
+
+SYNOPSIS
+     ccp [options] [infile|-] [outfile|-]
+
+COPYRIGHT
+     'cpp' is Copyright (C) 1993-1995 by FrexxWare. Author: Daniel Stenberg.
+
+DESCRIPTION
+     The C preprocessor	is a macro processor  that  is	used  au-
+     tomatically  by the C compiler to transform your program be-
+     fore actual compilation.  It is called a macro processor be-
+     cause it allows you to define macros, which are brief abbre-
+     viations for longer constructs.
+
+     The C preprocessor	provides four  separate	 facilities  that
+     you can use as you	see fit:
+
+     o	  Inclusion of header files.  These are	files of declara-
+	  tions	that can be substituted	into your program.
+
+     o	  Macro	expansion.  You	can define macros, which are  ab-
+	  breviations for arbitrary fragments of C code, and then
+	  the C	preprocessor will replace the macros  with  their
+	  definitions throughout the program.
+
+     o	  Conditional compilation.  Using  special  preprocessing
+	  directives,  you  can	 include  or exclude parts of the
+	  program according to various conditions.
+
+     o	  Line control.	 If you	use a program to combine or rear-
+	  range	 source	 files into an intermediate file which is
+	  then compiled, you can use line control to  inform  the
+	  compiler  of	where  each  source  line originally came
+	  from.
+
+     Most often	when you use the C preprocessor	you will not have
+     to	invoke it explicitly: the C/FPL compiler will do so
+     automatically.  However, the preprocessor is sometimes useful
+     individually.
+
+     The C preprocessor	expects	two file names as arguments,  in-
+     file  and	outfile.   The preprocessor reads infile together
+     with any other files it specifies with `#include'.	 All  the
+     output  generated	by the combined	input files is written in
+     outfile.
+
+     Either infile or outfile may be `-', which	as  infile  means
+     to	read from standard input and as	outfile	means to write to
+     standard output.  Also, if	outfile	or both	 file  names  are
+     omitted, the standard output and standard input are used for
+     the omitted file names.
+
+OPTIONS
+
+     Options are first read in the file "cpp.prefs" in current directory or
+     in  "s:cpp.prefs"  (AmigaDOS)  or "$HOME/cpp.prefs"  (UNIX), then  the
+     environment variable CPP_PREFS is scanned, and after that, the regular
+     command line options are read.
+
+     Options  must be written separated, with a  preceding  '-'.  Thus, the
+     two options X and Y must be written "-X -Y" and *NOT* "-XY".
+
+
+     The following options are supported:
+
+     -B  CPP normally predefines some symbols  defining the target computer
+         and operating system. If -B is specified, no  such symbols will be
+         predefined.
+
+     -b  Warnings  will be displayed if there  isn't as many  open as close
+         characters of the parentheses, brackets and braces symbols.
+
+     -C  If set,  source-file comments  are written  to  the  output.  This
+         allows  the output  of CPP to be  used as  the input to a program,
+         such  as  lint,  that  expects  commands  embedded  in  specially-
+         formatted comments.
+
+     -Dname=value    Define the name as if the programmer wrote
+
+                         #define name value
+
+                     at the  start  of the  first file. If "=value" is  not
+                     given, a value of "1" will be used.
+
+
+     -d  Display all given options, including input and output files.
+
+     -E  Always return "success"  to  the operating system, even  if errors
+         were  detected.  Note  that some  fatal errors will terminate CPP,
+         returning "failure" even if the -E option is given.
+
+     -F  Print  the  pathnames  of  included  files,  one per  line  on the
+         standard error.
+
+     -H  Try to keep all whitespaces as found in the source. This is useful
+         when you  want  an output using the same indent as the source has.
+         Otherwise,  any  number of  whitespaces will be replaced with  one
+         single space (' ').
+
+     -h  Output help text.
+
+     -Idirectory     Add   this  directory  to  the  list   of  directories
+                     searched   for  #include  "..."   and  #include  <...>
+                     commands. Note that there is no space between the "-I"
+                     and the directory string (that must end  with  a slash
+                     '/'). More than one -I command is permitted.
+
+     -J  Allow nested comments.
+
+     -j  Warn whenever a nested comment is discovered.
+
+     -LL Preprocesses input without producing line  control information for
+         the next  pass  of the C compiler.  This also  produces  an output
+         without unnecessary empty lines.
+
+     -L  Output "# <line>" prior to "#line <line>".
+
+     -M  Disable warnings when an include file isn't found.
+
+     -N  If  this  is specified,  the "always present"  symbols,  __LINE__,
+         __FILE__,  __TIME__, __DATE__,  __FUNCTION__ and __FUNC_LINE__ are
+         not defined.
+
+     -P  Do not recognize and remove C++ style comments.
+
+     -p  Enable warnings  on non ANSI preprocessor  instructions. When this
+         option  is enabled, all  #-keywords that are not  specified in the
+         ANSI standard X3J11 will be reported with warnings.
+
+     -Q  Makes cpp  ignore and visualize all  unrecognized flags. This flag
+         was implemented to make it possible to use my cpp with the default
+         AIX  'cc'  compiler.   Since   that  compiler  always  calls   the
+         preprocessor  with  some  other  flags  not   identified  by  this
+         compiler, I had to do this...
+
+     -q  Same as -Q, but silent. Nothing is output when unknown options are
+         ignored.
+
+     -R  In situations where concatenated macros are used like:
+         #define FOOBAR fooBAR
+         #define append(x,y) x ## y
+         #define BAR bar
+
+         append(FOO, BAR)
+
+         Result without -R: fooBAR
+         Result with    -R: FOObar
+
+         It is  unspecified in the ANSI draft  in  which  order to evaluate
+         this. Should the  "real"  second word first be appended before the
+         macro substitution  occurs,  or  should  the word get subsitituted
+         first? Most ANSI  compilers first append  the "real" words and  so
+         does 'cpp' if -R isn't specified. If  -R  is specified,  the right
+         part of  the  concat is first subject  to  substitution,  and then
+         append is done.
+
+     -Stext  cpp normally assumes  that  thesize of the  target  computer's
+             basic  variable  types  is the  same  as  the  size  of  these
+             types  of the  host computer.  The  -S  option  allows dynamic
+             respecification  of  these  values.   "text"  is  a  string of
+             numbers, separated  by commas,  that specifies  correct sizes.
+             The sizes must be specified in the exact order:
+
+                 char short int long float double
+
+             If you specify  the  option as  "-S*text", pointers  to  these
+             types will  be  specified. -S* takes  one  additional argument
+             for  pointer to function (e.g. int (*)())
+
+             For  example, to  specify sizes appropriate  for a PDP-11, you
+             would write:
+
+                    c s i l f d func
+                  -S1,2,2,2,4,8,
+                 -S*2,2,2,2,2,2,2
+
+             Note that *ALL* values must be specified.
+
+     -Uname  Undefine the name as if
+
+                 #undef name
+
+             were given.
+
+     -V  Do not output the version information at startup.
+
+     -W  Outputs all #defines at the end of the output file.
+
+     -w  Only output #defines and nothing else.
+
+     -X  #Includes the specified file at the top of the source file.
+
+
+  PRE-DEFINED VARIABLES:
+  ======================
+
+        When CPP begins processing, the following variables will
+        have been defined (unless the -B option is specified):
+
+        Preprocessor:
+
+            frexxcpp
+
+        Target computer (as appropriate):
+
+            m68000 amiga (on the Amiga version)
+
+        Target operating system (as appropriate):
+
+            amigados (on the Amiga version)
+
+        The following are always available unless undefined  (or
+        -N was specified):
+
+            __FILE__    The  input  (or  #include)  file   being
+                        compiled (as a quoted string).
+
+            __FUNCTION__ The function being compiled (as a quoted
+                        string).
+
+            __FUNC_LINE__ The start line of the function being
+                        compiled.
+
+            __LINE__    The line number being compiled.
+
+            __DATE__    The date of compilation as a Unix ctime
+                        quoted string (the trailing newline is
+                        removed).
+
+            __TIME__    The time of compilation.
+
+                    printf("Bug at line %d,", __LINE__);
+                    printf(" source file %s", __FILE__);
+                    printf(" compiled on %s", __DATE__);
+                    printf(" at the time %s", __TIME__);
+                    printf(" in function %s", __FUNCTION__);
+                    printf(" start line %d ", __FUNC_LINE__);
+
+
+
+  PREPROCESSOR INSTRUCTIONS
+  =========================
+
+  All cpp directive lines must begin with a # (pound sign).  These  directives
+  are:
+  
+  #define Name TokenString
+  
+          Replaces subsequent instances of Name with TokenString.
+  
+  #define Name(Argument, . . . ,Argument) TokenString
+  
+          Replaces  subsequent  instances  of  the  sequence  Name  (Argument,
+          ...  ,Argument)  with  TokenString,  where  each  occurrence  of  an
+          Argument in  TokenString  is replaced by  the corresponding token in
+          the comma-separated  list.   Note that  there must not be any  space
+          between Name and the left parenthesis.
+  
+  #error String
+
+          Generates an error string on this position.
+
+  #undef Name
+  
+          Ignores the definition of Name from this point on.
+  
+  #include "File" or #include <File>
+  
+          Includes  at  this  point the  contents  of  File,  which  cpp  then
+          processes.
+  
+          If  you  enclose File  in "  "  (double  quotation  marks)  the  cpp
+          command  searches  first  in the  directory  of  InFile,  second  in
+          directories named  with  the -I flag, and last  in directories  on a
+          standard list.
+  
+          If you  use  the <File> notation, cpp searches for  File only in the
+          standard  directories.   It  does not search  the directory in which
+          InFile resides.
+  
+  #line Number ["File"]
+  
+          Causes  the  implementation to behave  as if  the following sequence
+          of source lines begins  with a  source  line that  has a line number
+          as specified by Number.   If  File  is  supplied, the presumed  name
+          of the file is changed to be File.
+  
+  #pragma TokenString
+  
+          An implementation-defined instruction to the compiler.
+  
+  #endif        Ends a section of lines begun by a test directive (#if,
+  #ifdef, or #ifndef).  Each test directive must have a matching
+  #endif.
+  
+  #ifdef Name
+  
+          Places the subsequent lines in the output only if:
+  
+          Name has been defined by a previous #define
+  
+          or
+  
+          Name has been defined by the -D flag,
+  
+          or
+  
+          Name is a special name recognized by the cpp command,
+  
+          and
+  
+          Name has not been undefined by an intervening #undef,
+  
+          or
+  
+          Name has not been undefined with the -U flag.
+  
+  #ifndef Name
+  
+          Places the subsequent lines in the output only if:
+  
+          Name has never been defined by a previous #define,
+  
+          and
+  
+          Name is not a special name recognized by the cpp command,
+  
+          or
+  
+          Name has been  defined  by a previous  #define but  it  has been un-
+          defined by an intervening #undef,
+  
+          or
+  
+          Name is a  special name  recognized  by the cpp command, but  it has
+          been undefined with the -U flag.
+  
+  #if Expression
+  
+          Places subsequent lines in  the output  only  if  Expression  evalu-
+          ates  to  nonzero.   All  the binary nonassignment C operators,  the
+          ?:  operator, and  the unary  -, !,  and -  operators are  legal  in
+          Expression.   The  precedence  of the operators is the  same as that
+          defined  in  the  C  Language.   There  is  also  a  unary  operator
+          defined, which can be used in Expression in these two forms:
+  
+          defined (Name) or defined Name
+  
+          This  allows the utility  of  #ifdef and #ifndef  in  a  #if  direc-
+          tive.   Only these operators,  integer  constants,  and  names  that
+          are known by cpp  should be used  in Expression.   The sizeof opera-
+          tor is not available.
+  
+  #elif Expression
+  
+          Places  subsequent lines in the output only if the expression in the
+          preceding #if or #elif directive evaluates to false or is undefined,
+          and this Expression evaluates to true.
+  
+  #else
+
+          Places subsequent lines in the output only if  the expression in the
+          preceding #if or #elif directive evaluates  to false or is undefined
+          (and hence the lines following the #if and preceding the  #else have
+          been ignored).
+  
+          Each  test  directive's  condition  is  checked  in  order.   If  it
+          evaluates to false (zero), the  group that it controls  is  skipped.
+          Directives  are  processed  only through the  name  that  determines
+          the directive  in  order to keep track of the  level of nested  con-
+          ditionals;  the  rest  of the directives' preprocessing  tokens  are
+          ignored,  as  are the  other  preprocessing  tokens  in  the  group.
+          Only  the  first  group  whose control  condition evaluates  to true
+          (nonzero)  is  processed.  If  none of the  conditions evaluates  to
+          true, and  there  is  a  #else directive, the  group  controlled  by
+          the  #else  is   processed;  lacking  a  #else  directive,  all  the
+          groups until the #endif are skipped.
+  
+
+  Macros
+     Formal  parameters  for  macros  are  recognized  in   #define  directive
+     bodies, even  when they  occur  inside  character  constants  and  quoted
+     strings.  For instance, the output from:
+
+          #define abc(a) |\a|
+          abc(xyz)
+
+     is the seven characters ``  |`xyz|''  (SPACE, vertical-bar, backquote, x,
+     y, z, vertical-bar). Macro  names  are  not recognized  within  character
+     constants or quoted strings during the regular scan.  Thus:
+          #define abc xyz
+          printf("abc");
+
+     does  not expand abc in the  second line,  since it is  inside  a  quoted
+     string  that  is not part of a #define macro definition.
+
+     Macros are  not  expanded while  processing a  #define  or #undef.  Thus:
+
+          #define abc zingo
+          #define xyz abc
+          #undef abc
+          xyz
+
+     produces  abc. The token appearing immediately after an #ifdef or #ifndef
+     is not expanded.
+
+     Macros  are  not expanded during  the scan  which  determines the  actual
+     parameters to another macro call.  Thus:
+
+          #define reverse(first,second)second first
+          #define greeting hello
+          reverse(greeting,
+          #define greeting goodbye
+          )
+
+     produces `` #define hello goodbye  hello''.
+
+  Output
+     Output consists of  a  copy of the  input  file, with modifications, plus
+     lines of the form:
+
+          #line <lineno> "filename"
+
+     indicating  the original source line number and filename of the following
+     output line.
+
+  Details
+  Directory Search Order
+     #include files is:
+
+          1.  The   directory   of  the  file   that  contains  the  #include
+              request (that is, #include is relative to the file being scanned
+              when the request is made).
+
+          2.  The directories specified by -I options, in left-to-right order.
+
+          3.  The standard  directory(s)  (/usr/include/ on  UNIX systems,
+              INCLUDE: on Amiga systems and /dd/defs/ on OS/9(000) systems).
+
+  Special Names
+     Six special names are  understood by  cpp.  The name  __LINE__ is defined
+     as the current line number (a decimal integer) as known by  cpp, __FILE__
+     is defined as the current filename (a C string) as known by cpp, __DATE__
+     is defined as  the current date  (a C string), __TIME__ is defined as the
+     start  time of the preprocessing (a C string), __FUNCTION__ is defined as
+     the function  the  C  source currently  is  defining  (a  C  string)  and
+     __FUNC_LINE__ is  defined  as the beginning line  of  the function  the C
+     source  currently is defining  (a  decimal  integer).   They  can be used
+     anywhere (including in macros) just as any other defined name.
+
+  Newline Characters
+     A  NEWLINE character  terminates a character constant  or quoted  string.
+     An escaped  NEWLINE (that  is,  a  backslash  immediately  followed  by a
+     NEWLINE) may  be  used in  the body of a #define  statement  to  continue
+     the  definition onto the next line.  The escaped NEWLINE is not  included
+     in the macro value.
+
+  Comments
+     Comments  are removed  (unless  the  -C option  is  used  on the  command
+     line).  Comments  are also ignored, except  that a  comment  terminates a
+     token.
+
+
+DIAGNOSTICS
+     The error  messages produced by cpp  are intended to be self explanatory.
+     The  line number  and filename where the error occurred are printed along
+     with the diagnostic.
+
+
+NOTES
+     When NEWLINE characters were found  in  argument lists  for macros to  be
+     expanded, some previous versions of cpp put out the NEWLINE characters as
+     they were found and expanded.   The current version of cpp  replaces them
+     with SPACE characters.
+
+     Because  the  standard directory for  included files may be  different in
+     different environments, this form of #include directive:
+
+          #include <file.h>
+
+     should be used, rather than one with an absolute path, like:
+
+          #include "/usr/include/file.h"
+
+SUN SPECIFIC: (Should this be implemented in 'cpp' ?)
+
+     cpp warns about the use of the absolute pathname.
+
+
+  EXAMPLES
+  ========
+  
+  1.    To display the text that the preprocessor sends to the C compiler,
+  enter:
+  
+  cpp  pgm.c
+  
+  This preprocesses pgm.c and displays the resulting text at the work station.
+  You may want to see the preprocessor output when  looking for errors in your
+  macro definitions.
+  
+  
+  
+  2.    To create a file containing more readable preprocessed text, enter:
+  
+  cpp  -C -L pgm.c pgm.i
+  
+  This preprocesses  pgm.c and  stores  the result  in  pgm.i.  It omits  line
+  numbering  information intended  for  the  C  compiler  (-L),  and  includes
+  program comments (-C).
+  
+  
+  
+  3.    To predefine macro identifiers, enter:
+  
+  cpp  -DBUFFERSIZE=512  -DDEBUG  pgm.c  pgm.i
+  
+  This defines BUFFERSIZE with the value 512 and DEBUG with the value 1 before
+  preprocessing.
+  
+  
+  
+  4.    To use #include files located in nonstandard directories, enter:
+  
+  cpp  -I/home/jim/include  pgm.c
+  
+  This  looks in  the  current directory for quoted #include  files,  then  in
+  /home/jim/include,  and then  in  the  standard  directories.  It  looks  in
+  /home/jim/include for angle-bracketed #include  files (<  >) and then in the
+  standard directories.
+  
+
+ERROR MESSAGES:
+
+    Many. CPP prints warning or error messages if you try to use multiple-
+    byte  character constants (non-transportable)  if  you #undef a symbol
+    that  was not defined, or  if  your  program  has  potentially  nested
+    comments.
+
+AUTHORS:
+
+     I received a great deal of  help from many people  in  debugging cpp.
+    Alan Feuer  and Sam Kendall  used "state  of  the  art" run-time  code
+    checkers to locate several  errors.   Ed Keiser  found  problems  when
+    cpp  was  used  on machines  with different  int  and  pointer  sizes.
+    Dave Conroy  helped  with the  initial  debugging,  while Arthur Olsen
+    and  George  Rosenberg found  (and solved)  several  problems  in  the
+    first USENET release.
+                                                    Martin Minow
+
+     After this, as can be seen in the source files, a lot of other people
+    has been  improving  this  package. Among  others  the  guys  with the
+    signatures: ado, george, RMS, FNF, Ois, Keie, ARF, SCK and gkr...
+     I rewrote large parts of the code to adapt in to strict  ANSI C rules
+    and to easier put it  into a  shared library.  I did  compile it to  a
+    shared library. I added most of the features and options you see today
+    (such  as  -L,  -P,  -V,  -l, -A,  -b, -l, -Q, -F,  -H  and  a  proper
+    separation of  the -B and -N option). I fixed the -C  option to output
+    the  comments more  like they appear  in  the source  (that  is _with_
+    newlines between comments that had that in the source).
+     I rewrote parts to enable all output through the user supplied output
+    function.  I added  documentation  and  information  that really  were
+    missing when  I  got this  in my hands. I changed  it to Freeware from
+    being public  domain  since  I don't want anyone to earn  money on  my
+    sweat. (If  you want  the  public domain version of  this  code,  mail
+    me or the original author to get it.)
+     Unfortunately, I never actually succeeded in my mission  to put 'cpp'
+    in a  shared library under  AmigaDOS  although I did it under AIX, but
+    instead I have managed to compile 'cpp' under DELL UNIX, AIX, OS/9000,
+    SUN OS and AmigaDOS without errors (although warnings with gcc in the
+    'cpp3.c' source file!).
+     'cpp' most certainly  will  need  an ANSI C compilers to  be  able to
+    compile  without  a  lot of troubles. Function  pointers as  structure
+    members are not friends of K&R...
+                                                      Daniel Stenberg
+              (email: Daniel.Stenberg@sth.frontec.se - FidoNet: 2:201/328)
+
+BUGS:
+
+      The #if expression processor uses signed integers only.
+      I.e, #if 0xFFFFu < 0 may be TRUE.

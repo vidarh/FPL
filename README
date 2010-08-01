@@ -1,0 +1,169 @@
+  FPL v14.7 beta
+  ~~~~~~~~~~~~~~
+ FPL is (C) by FrexxWare 1992-1996. All rights reserved.
+
+ *WARNING* This software does not work! If you decide to run or use this
+program you should be aware that this is an early beta version and not at
+all stable and in fact we have several known ways of crashing it.
+
+ LIMITS
+ ~~~~~~
+ None. The multi-platform stuff may not work as good as the Amiga-stuff does
+since I've yet not done enough tests.
+ I intend to fix those problems really soon. This beta release is to be
+considered very close to the "real thing"...
+
+ INSTALL
+ ~~~~~~~
+ This is a full FPL distribution package, but the only binaries included are
+the Amiga's fpl.library, fplc and cpp.
+
+ This version of the library is though very stable on interpreting FPL, why
+at least I (Daniel) have installed this in my LIBS: drawer since long ago. It
+is only when experimenting with compiled programs I've found errors so far. If
+you don't do that, just make sure FrexxEd (or whatever you run that uses FPL)
+find the v14 instead of your previous <v14 .library when started.
+
+ * compiler
+
+ Make sure both 'fplc' and 'cpp' are in you system path. Run 'fplc <file>'
+or simply 'fplc' to list all available command line options.
+
+ DOCS
+ ~~~~
+ I trust you read the docs before asking the most trivial questions. Both
+pure ASCII and amigaguide versions are included. I know there are a lot more
+to wish from the docs but time is short and there are lots of things to do.
+I plan on making the programming-with-fpl-library docs up-to-date within the
+nearest future, but don't take it as a promise or start counting days...
+
+ HOW TO REPORT
+ ~~~~~~~~~~~~~
+ Mail detailed reports of how to repeat bugs or suggestions of what FPL
+should do to: Daniel.Stenberg@sth.frontec.se. Of course we're also
+still available at our regular fido net address as well as I (Daniel) am
+available most [euro-]days on IRC channel #FrexxEd, using the nick 'Bagder'.
+
+						Enjoy - Daniel
+
+
+ Frexx Programming Language (FPL) is an interpreting script/macro language
+ shared library, designed to be flexible and easy inserted in any code.
+
+ FPL is a complete script programming language _very_ similar to C. If you
+ are a software developer and plans to add any kind of macro/script control,
+ consider the FPL alternative!
+
+ FPL library lets the software programmer define functions and variables that
+ FPL should accept. The library will call a function in the software whenever
+ any of these functions are used or variables are read in an FPL program.
+
+ The programming language features include:
+
+   o Full ANSI C syntax statements with semicolon separations.
+
+   o String, integer/long, char and short variables, including
+     multidimensional arrays.
+
+   o 100% ANSI C operator precedence and expression syntax.
+
+   o C and C++ style comments.
+
+   o A subset of the ANSI C function declaration and prototyping syntax and
+     concepts. The use of functions is exactly as C.
+
+   o Fully recursive, fully re-entrant.
+
+   o Local/global variable levels just as in ANSI C. Global variables can be
+     global within this particular file, or cross-file.
+
+   o As an extension to C, local and global functions. Global functions can
+     also be either system-wide or single file accessible.
+
+   o Enhanced (from ANSI C) array compound assigns.
+
+   o while, for, if, do, break, continue, else, int, exit, char, long,
+     register, auto, volatile, typedef, const and return are 100% ANSI C
+     compatible. 'while' has been extended with an 'else' support and 'break'
+     with a multi level break option.
+
+   o Octal, decimal, binary and decimal numbers are all easily used and mixed
+     as in C; and for those parts not existing in C, likewise syntax.
+
+   o A number of internal functions which include: strcmp, strncmp, strstr,
+     atoi, strtol, strlen, abs, sprintf and the FPL specific substr, eval,
+     ltostr and interpret!
+
+   o Supports the preprocessor instruction "#line" enabling FPL to run
+     common C preprocessor output.
+
+   o Some variable reference/pointer support like that C has!
+
+ Library features include:
+
+   o Interpreting common ASCII text files. Create the programs in your
+     favourite editor.
+
+   o 100% real-time.
+
+   o Using an own stack without charging the host process' stack, including
+     extensive and exclusive stack expanding possibilies, controllable by the
+     library programmer.
+
+   o Full function argument parsing, you don't have to do more than reading
+     them from the array FPL supplies you with.
+
+   o Easily compiled to a shared library under AmigaDOS, UNIX and OS/2.
+     Compiled to link library under any modern operating system featuring an
+     ANSI C compiler. (It has beeen successfully compiled under AIX, SunOS,
+     Dell UNIX, HPUX and OS/2.)
+
+   o Source code available enables fast ports to other operating systems.
+
+   o FPL library is around 45KB (amiga version)/65KB (OS/2 version).
+
+   o Very dynamic function adding and deleting possibilities.
+
+   o Dynamic program design. Small FPL programs will demand very little memory
+     to run.
+
+   o Demands less additional code than ARexx equivalences.
+
+   o All library functions are fully re-entrant.
+
+   o Deals with direct function calls instead of message port overhead, but
+     can easlily be made to do so if wanted.
+
+   o Resource tracking. All memory used/allocated by FPL is ALWAYS returned
+     when calling FPL's cleanup routine.
+
+   o Multi source file system. Declare and write functions in any number of
+     files and call cross-file! FPL keeps track of the files and can be made
+     to flush all files not in use.
+
+   o Invoking single, already declared/defined, FPL functions from another
+     FPL invoke is intuitive and easy done.
+
+   o Internal functions can be replaced by user functions.
+
+   o Runs on AmigaDOS 1.3 and later.
+
+ Package advantages:
+
+   o FPL is freeware! Use it for free.
+
+   o Includes an example program that interprets a common C language expression
+     from the command line.
+
+   o ~300 KB documentation in amigaguide format (+ clean ASCII versions)
+
+ FPL is Copyright (C) 1992-1996 by FrexxWare and freely distributable for
+ NON-COMMERCIAL PURPOSES ONLY, including extensive documentation and source
+ code.
+
+ Author:
+   Daniel Stenberg
+   Ankdammsgatan 36, 4tr
+   S-171 43 SOLNA
+   FidoNet 2:201/328
+   email: Daniel.Stenberg@sth.frontec.se

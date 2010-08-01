@@ -1,0 +1,83 @@
+ ************************************************************************
+ *                                                                      *
+ * fpl.library - A shared library interpreting script langauge.         *
+ * Copyright (C) 1992-1994 FrexxWare                                    *
+ * Author: Daniel Stenberg                                              *
+ *                                                                      *
+ * This program is free software; you may redistribute for non          *
+ * commercial purposes only. Commercial programs must have a written    *
+ * permission from the author to use FPL. FPL is *NOT* public domain!   *
+ * Any provided source code is only for reference and for assurance     *
+ * that users should be able to compile FPL on any operating system     *
+ * he/she wants to use it in!                                           *
+ *                                                                      *
+ * You may not change, resource, patch files or in any way reverse      *
+ * engineer anything in the FPL package.                                *
+ *                                                                      *
+ * This program is distributed in the hope that it will be useful,      *
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of       *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.                 *
+ *                                                                      *
+ * Daniel Stenberg                                                      *
+ * Ankdammsgatan 36, 4tr                                                *
+ * S-171 43 Solna                                                       *
+ * Sweden                                                               *
+ *                                                                      *
+ * FidoNet 2:201/328    email:dast@sth.frontec.se                       *
+ *                                                                      *
+ ************************************************************************
+
+	include	'exec/types.i'
+	include	'exec/resident.i'
+	include	'exec/nodes.i'
+	include	'exec/libraries.i'
+
+PRI	equ	0
+
+
+	section  text,code
+   
+	xref	_LibID
+	xref	_LibName
+	xref	RESLEN
+	xref	_BSSBAS		* linker defined base of BSS
+	xref	_BSSLEN		* linker defined length of BSS
+	xref	_LibFuncTab
+	xref	_LibInitTab
+			
+
+	CNOP	4
+	xref	_LibInit
+	xdef	_LibRomTag
+	
+	moveq	#0,d0
+	rts
+_LibRomTag:
+	dc.w	RTC_MATCHWORD
+	dc.l	_LibRomTag
+	dc.l	endtag
+*	dc.b	RTF_AUTOINIT
+*	dc.b	_LibVersion
+	dc.w	RTF_AUTOINIT<<8+_LibVersion
+       IFD DEVICE
+	dc.b	NT_DEVICE
+       ELSE
+	dc.b 	NT_LIBRARY
+       ENDC
+	dc.b	PRI
+	dc.l	_LibName
+	dc.l	_LibID
+	dc.l	_LibInitTab
+endtag:
+	section	__MERGED,data
+	xdef	_Libmergeddata
+_Libmergeddata	dc.l	0
+
+	csect	 data,0,1,1,2
+        xref     _LibVersion    * need a 16 bit reloc here
+
+
+	end
+	
+
+

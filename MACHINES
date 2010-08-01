@@ -1,0 +1,74 @@
+>> This is a list with all machines and operating systems FPL has been
+>> [reported] successfully compiled on.
+
+OS: Windows 95
+HW: Pentium 120, 48MB ram
+Makefile: *none* VisualC++ 5 crap, just add all files to a "DLL project"
+FPL: 14.12
+WHO: Daniel Stenberg <Daniel.Stenberg@sth.frontec.se>
+
+OS: FreeBSD
+Makefile: Makefile.FreeBSD (fixed after Chris Larsen's instructions)
+FPL: 14.12
+WHO: Chris Larsen <vader@vader.dk>
+
+OS: IRIX
+Makefile: Makefile
+FPL: 14.7
+WHO: Bjørn Reese <breese@imada.ou.dk>
+
+OS: HP-UX 9.05
+HW: HP7012/60
+Makefile: Makefile.HPUX
+FPL: 12.2
+WHO: Linus Nielsen <emwnie@emw.ericsson.se>
+Note: Requires the ANSI C Devloper's Bundle (e.g. -Aa is supported)
+
+OS: Solaris 2.5 (SunOS 5.5)
+HW: Sparc 5/10
+Makefile: Makefile
+FPL: 14.7
+WHO: Daniel Stenberg
+
+OS: Linux 2.0.*
+Makefile: Makefile.Linux
+FPL: 14.7
+WHO: Bjørn Reese <breese@imada.ou.dk>
+
+OS: DELL UNIX (SVR4) 4.0
+HW: Intel 80486 DX2 66, 32 MB RAM
+Makefile: Makefile
+FPL: 14.7
+WHO: Daniel Stenberg
+
+OS: SunOS 4.1.1
+HW: Sun IPC, 12 MB RAM
+Makefile: Makefile.SUNOS
+FPL: 14.7
+WHO: Daniel Stenberg
+
+OS: OS/2 3.0
+HW: Intel 80486 DX33, 16 MB RAM
+Makefile: Makefile.OS2
+FPL: 13.7
+WHO: Björn Stenberg <Bjorn.Stenberg@sth.frontec.se>
+
+OS: AmigaDOS V40 (3.1)
+HW: A3000/25, 14 MB RAM
+Makefile: smakefile
+FPL: 14.7
+WHO: Daniel Stenberg
+Note: Requires the SAS/C compiler
+
+OS: NetBSD
+HW: (Amiga '020+)
+Makefile: Makefile.FILE
+FPL: 12.2
+WHO: Volker Güth <vgueth@hrz.uni-bielefeld.de>
+
+OS: Windows NT 3.?
+HW: Intel Pentium 90MHz, 32 MB RAM
+Makefile: --
+FPL: 13.8
+WHO: Björn Stenberg
+Note: Visual C++ 4

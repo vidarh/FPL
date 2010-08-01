@@ -1,0 +1,84 @@
+##############################################################################
+##                              FREXXWARE
+##############################################################################
+##
+## Project: Frexx C Preprocessor
+## $Source: /home/user/start/cpp/RCS/smakefile,v $
+## $Revision: 1.2 $
+## $Date: 1994/01/24 09:40:03 $
+## $Author: start $
+## $State: Exp $
+## $Locker:  $
+##
+##############################################################################
+## $Log: smakefile,v $
+# Revision 1.2  1994/01/24  09:40:03  start
+# Changed slightly.
+#
+# Revision 1.1  1993/11/03  09:19:28  start
+# Initial revision
+#
+##
+##############################################################################
+
+# Amiga SAS/C specific makefile
+
+CPP	  = cpp
+TARGET    = fpp.library
+FILECPP   = cpp
+DEBUGFLAG =
+LDFLAGS   =
+DEFINES   = DEFINE=amiga DEFINE=pdc DEFINE=AMIGA
+#DEFINE=SHARED
+CC        = sc
+LINK      = slink
+DEBUGFLAG = OPTIMIZE # DEBUG=S
+CFLAGS    = $(DEBUGFLAG) $(DEFINES) $(CPPDEFINE) NOVERSION
+LIBS      = LIB:sc.lib LIB:amiga.lib
+
+# ** compile cpp
+#
+OBJS =	cpp1.o cpp2.o cpp3.o cpp4.o cpp5.o cpp6.o memory.o
+
+all: $(FILECPP)
+#$(TARGET) $(CPP)
+
+$(TARGET): $(OBJS)
+       slink with <<
+	LIBFD fpp.fd 
+	to $(TARGET)
+	FROM lib:libent.o lib:libinit.o $(OBJS)
+	lib $(LIBS)
+	noicons
+	SD SC
+	libversion 1 librevision 0
+<
+
+#$(CPP): usecpp.o
+#	$(CC) DEBUG=S DEFINE=SHARED STRINGMERGE link PNAME=$(CPP) usecpp.c
+
+$(FILECPP): $(OBJS) usecpp.o
+       slink with <<
+	to $(FILECPP)
+	FROM LIB:cres.o $(OBJS) usecpp.o
+	lib $(LIBS)
+	noicons
+	SD SC
+<
+	
+
+
+#
+# Object module dependencies
+#
+
+$(OBJS) :       cpp.h cppdef.h
+
+cpp1.o:cpp1.c
+cpp2.o:cpp2.c
+cpp3.o:cpp3.c
+cpp4.o:cpp4.c
+cpp5.o:cpp5.c
+cpp6.o:cpp6.c
+usecpp.o:usecpp.c
+memory.o:memory.c

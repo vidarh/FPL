@@ -1,0 +1,102 @@
+# $VER: fpl.library makefile v4.0 95-07-08
+
+########################################################################
+#                                                                      #
+# fpl.library - A shared library interpreting script langauge.         #
+# Copyright (C) 1992-1996 FrexxWare                                    #
+# Author: Daniel Stenberg                                              #
+#                                                                      #
+# This program is free software; you may redistribute for non          #
+# commercial purposes only. Commercial programs must have a written    #
+# permission from the author to use FPL. FPL is *NOT* public domain!   #
+# Any provided source code is only for reference and for assurance     #
+# that users should be able to compile FPL on any operating system     #
+# he/she wants to use it in!                                           #
+#                                                                      #
+# You may not change, resource, patch files or in any way reverse      #
+# engineer anything in the FPL package.                                #
+#                                                                      #
+# This program is distributed in the hope that it will be useful,      #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of       #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.                 #
+#                                                                      #
+# Daniel Stenberg                                                      #
+# Ankdammsgatan 36, 4tr                                                #
+# S-171 43 Solna                                                       #
+# Sweden                                                               #
+#                                                                      #
+# FidoNet 2:201/328    email:dast@sth.frontec.se                       #
+#                                                                      #
+########################################################################
+
+TARGET = FPLc		# FPL compiler
+
+#
+# These flags build the .library:
+#
+FLAGS = RESETOPTIONS STRINGMERGE UNSIGNEDCHAR DATA=NEAR\
+NOVERSION DEFINE=AMIGA NOMULTIPLEINCLUDES STACKEXT DEFINE=PASS2\
+DEBUG=S DEFINE=DEBUG_OUTPUT ANSI\
+OPTIMIZE
+
+ASMFLAGS = IDIR=Include: ASSEMBLER
+LINKFLAGS = SC SD
+LIBS = LIB:sc.lib
+OBJS = script.o numexpr.o hash.o statement.o error.o debugmem.o\
+       frontend.o scan.o caller.o comp.o pass2.o pass3.o optimize.o
+CC = sc
+ASM = sc
+LINK = slink
+
+all: $(TARGET)
+
+$(TARGET): $(OBJS) smakefile
+      slink with <<
+to $(TARGET)
+FROM LIB:c.o $(OBJS)
+lib $(LIBS)
+noicons
+SD SC
+STRIPDEBUG
+FWIDTH 20 PWIDTH 20 WIDTH 20
+map FPL.map H
+<
+
+script.o: script.c script.h FPL.h
+	$(CC) $(FLAGS) $<
+
+numexpr.o: numexpr.c script.h FPL.h
+	$(CC) $(FLAGS) $<
+
+hash.o: hash.c script.h FPL.h
+	$(CC) $(FLAGS) $<
+
+statement.o: statement.c script.h FPL.h
+	$(CC) $(FLAGS) $<
+
+frontend.o: frontend.c script.h FPL.h
+	$(CC) $(FLAGS) $<
+
+error.o: error.c script.h error.h
+	$(CC) $(FLAGS) $<
+
+scan.o: scan.c FPL.h script.h
+	$(CC) $(FLAGS) $<
+
+caller.o: caller.c pass2.h pass3.h FPL.h script.h
+	$(CC) $(FLAGS) $<
+
+comp.o: comp.c comp.h FPL.h script.h
+	$(CC) $(FLAGS) $<
+
+pass2.o: pass2.c pass2.h comp.h script.h
+	$(CC) $(FLAGS) $<
+
+pass3.o: pass3.c pass3.h pass2.h comp.h script.h
+	$(CC) $(FLAGS) $<
+
+optimize.o: optimize.c optimize.h comp.h script.h
+	$(CC) $(FLAGS) $<
+
+debugmem.o: debugmem.c debugmem.h
+	$(CC) $(FLAGS) $<

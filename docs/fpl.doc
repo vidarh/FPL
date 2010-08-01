@@ -1,0 +1,1511 @@
+TABLE OF CONTENTS
+
+fpl.library/fplAddFunction
+fpl.library/fplAddVariable
+fpl.library/fplAlloc
+fpl.library/fplAllocString
+fpl.library/fplAlloca
+fpl.library/fplCloseLib
+fpl.library/fplConvertString
+fpl.library/fplDealloc
+fpl.library/fplDealloca
+fpl.library/fplDelFunction
+fpl.library/fplExecuteFile
+fpl.library/fplExecuteScript
+fpl.library/fplFree
+fpl.library/fplFreeString
+fpl.library/fplGetErrorMsg
+fpl.library/fplInit
+fpl.library/fplLtostr
+fpl.library/fplOpenLib
+fpl.library/fplReference
+fpl.library/fplReset
+fpl.library/fplSend
+fpl.library/fplStrtol
+fpl.library/fplStrtol                                 fpl.library/fplStrtol
+
+   NAME
+	fplStrtol -- convert a string holding a number to a long integer.
+
+   SYNOPSIS
+	long fplStrtol( string, base, end);			(V8)
+	D0		A0      D0    D1
+
+   FUNCTION
+	Converts a string representation of a number to a long integer.
+	The convertion will use the supplied base or if zero (0) is specified,
+	it will scan the string and figure out the base itself. The recognized
+	prefixes are the FPL standard; '0' for octal numbers, '0x' for
+	hexadecimal and '0b' for binary.
+	The 'end' parameter is a supplied pointer to a char pointer in which
+	the position of the final parse position will be stored.
+
+   RESULT
+	The long integer the string was converted to!
+
+   INPUTS
+	char *string	- Pointer to the string to convert!
+	long base	- Base to use when the convertion is performed
+	char **end	- Pointer to a char pointer in where to store the
+			  position of the end of the convertion.
+
+   SEE ALSO
+	fplLtostr and the strtol() function in FPLuser.guide
+
+fpl.library/fplLtostr                               fpl.library/fplLtostr
+
+   NAME
+	fplLtostr -- convert a long integer to a string.
+
+   SYNOPSIS
+	char *fplLtostr( key, base, number);			(V8)
+	D0               A0   D0    D1
+
+   FUNCTION
+	Converts the inpute 'number' using the 'base' parameter. The result
+	will be returned as a pointer to a stringm or NULL is something
+	failed. Each call to this function must have a matching call to the
+	fplFreeString() function.
+
+   RESULT
+	A pointer to a zero terminated string or NULL if the function failed.
+	The returned string must be freed with a call to fplFreeString().
+
+   INPUTS
+	void *key	- Return value from fplInit().
+	long base	- Base to use when converting.
+	long number	- Number to create a string from.
+
+   SEE ALSO
+	fplStrtol and the ltostr() function in FPLuser.guide
+
+fpl.library/fplConvertString                     fpl.library/fplConvertString
+
+   NAME
+	fplConvertString -- convert FPL string to binary.
+
+   SYNOPSIS
+	long fplConvertString( key, convert, buffer );		(V4)
+	D0		       A0   A1       A2
+
+   FUNCTION
+	Convert a FPL syntax string to a binary string. *ALL* in FPL allowed
+	backslash sequences are supported. The string to convert should be a
+	zero terminated string.
+
+	The output will be stored in the buffer given as input. FPL also adds
+	a terminating zero to the output string.
+
+   RESULT
+	The number of characters in the output string. The terminating zero
+	excluded.
+
+   INPUTS
+	void *key	- Return value from fplInit().
+	vhar *convert	- String to convert to binaries.
+	char *buffer	- Pointer to buffer large enough to hold the resulting
+			  string plus an additional zero terminate byte.
+
+fpl.library/fplExecuteScript                     fpl.library/fplExecuteScript
+
+   NAME
+	fplExecuteScript -- execute an FPL program.
+	fplExecuteScriptTags -- execute an FPL program.
+
+   SYNOPSIS
+	long fplExecuteScript( key, program, lines, tags );
+	D0       	       A0   A1	     D0     A2
+
+	For SAS/C users:
+	long fplExecuteScriptTags( key, program, lines, ... );
+
+   FUNCTION
+	This function executes the program (array of char pointers) pointed
+	to by the program parameter according to the rules set by the
+	call to fplInit(). Each line must end with a zero (0) byte.
+	If any error occurs, the function returns proper error code (see
+	FPL.h).
+
+	If the program is started and is expected only to run once and then to
+	be removed from memory, use the FPLTAG_STOREGLOBALS tag to disable any
+	global symbol storage.
+
+	The tag list pointer is new for V3.
+
+   TAGS
+	FPLTAG_INTERPRET
+	  This data is interpreted after all declaring and prototyping has been
+	  done in the FPL program. NULL will disable. Mainly implemented to
+	  enable single function invokes within a larger program. The data of
+	  this tag is to be looked upon as a string argument to an interpret()
+	  function call. After this interpret() call, the FPL program will
+	  exit.
+		This example calls only the function named foobar (with 2 and 3
+		as parameters) within the much larger program:
+
+		unsigned long tags={
+		  FPLTAG_INTERPRET, "foobar(2, 3);", FPLTAG_DONE
+		};
+		fplExecuteScript(anchor, programarray, 200, tags);
+
+	  NOTE: This intepreted statement will act *EXACTLY* as if it is
+	  interpreted by the program right before the actual start of the main
+	  program. If you call any inside function, it *must* be prototyped
+	  properly first or else this will fail!
+
+	  HINT: This enables a beautilful way for us to send arguments to the
+	  FPL functions. By making the main function including prototyping just
+	  as any other function. Invoke the following example with the tag
+	  {FPLTAG_INTERPRET, "main(22, \"Daniel\");"} and you see my point!
+		Example:
+
+		int main(int, string);
+		exit(-1);	/* just to prevent normal starts */
+		int main(int age, string name)
+		{
+		   output(name " is " age " years old!\n");
+		}
+
+
+	FPLTAG_STARTPOINT.
+	  By setting this pointer you can force FPL to start interpreting at
+	  another position than from the start of the program. If this start
+	  position is on any other line than the first, FPLTAG_STARTLINE must
+	  be set too.
+
+	FPLTAG_STARTLINE
+	  Set this only if you set the FPLTAG_STARTPOINT tag. By only setting
+	  this tag, you achieve nothing but confusing the interpreter.
+
+	  NOTE regarding these upper two tags: when changing the interpreting
+	  start position you must think of that the variable declarations
+	  and/or function prototyping that may be written in the original
+	  start of program might get passed.
+
+	FPLTAG_USERDATA
+	  Does the same as when used in fplInit() or fplReset().
+
+	FPLTAG_CACHEFILE
+	  Turn on or off FPL caching of this file. Default is set with the
+	  'FPLTAG_CACHEALLFILES' in a fplInit() or a previous fplReset()
+	  call. Its default is FPLCACHE_NONE.
+
+	  Cashing can be done in three ways:
+	  FPLCACHE_NONE    - Will never ever cache a file
+	  FPLCACHE_ALWAYS  - Will cache files that have one or more global
+			     symbols
+	  FPLCACHE_EXPORTS - Will only cache files that have exported symbols.
+
+	  NOTE: Files that do not declare any global symbols will not be
+	  cached, no matter what this tag says!
+
+	FPLTAG_FILEGLOBALS/FPLTAG_ISCACHED
+	  Supply this tag a pointer to a `long'. This variable will tell if the
+	  progam declared any global symbols, which is the same as if it is to
+	  be cached. The long will contain zero if no global symbols were
+	  declared or non-zero if a not known number of variables were
+	  declared.
+
+	FPLTAG_PROGNAME
+	  Name of the FPL program. When using multiple FPL source files it is
+	  almost required to use this tag. If any error occurs when running
+	  FPL, the FPLSEND_GETPROGNAME will receive a pointer to the program
+	  name (or "<unknown program>" if it is never set). fplExecuteFile()
+	  sets the program name by default to the file name. Programs without
+	  names can never be cached!
+
+	FPLTAG_FILENAMEGET
+	  Tells FPL that when this file has been flushed, the program can be
+	  found by using the program name as file name to read from. Set as
+	  default be fplExecuteFile().
+
+	FPLTAG_STRING_RETURN					(V6)
+	  Supply a pointer to a char pointer. This enables the started FPL
+	  programs to return a string to you. The string can be returned from
+	  the main (highest) level of the FPL program with "return" or from
+	  any level with "exit". The string will be readable just like any
+	  regular string from FPL. The FPL_STRLEN macro will give to the
+	  length of the returned string.
+
+	  Programs that are executed with this tag set will not be able to
+	  return any other data than a string! Using the FPLSEND_GETRETURNCODE
+	  tag in a fplSend() call will not return a valid number!
+
+	  The string is to be treated exactly as fplAllocString() strings:
+	  you must fplFreeString() it when you have finished using it. The
+	  string can even be used with the FPLSEND_DONTCOPY_STRING tag to
+	  the fplSend() call!
+
+	FPLTAG_REREAD_CHANGES					(V8)
+	  Suppy a boolean to switch this on/off for this script/file. When
+	  enabled this file is attempted to be ran and the actual file has
+	  been changed on disk, all symbols declared in the file will be
+	  removed and the new version will be loaded and run instead.
+
+	  * Default for this state is set with the same tag to fplInit().
+	  * This can be forced on/off with the pragmas 'reread' and 'noreread'
+	    inside the FPL program.
+	  * This tag will only be of use for calls to fplExecuteFile().
+
+	FPLTAG_FLUSH_NOT_IN_USE					(V8)
+	  Suppy a boolean to switch this on/off for this script/file. When
+	  enabled, and this file isn't in use, the program will be flushed
+	  from memory and read into memory again when accessed.
+
+	  * Default for this state is set with the same tag to fplInit().
+	  * This can be forced with the pragmas 'cache' and 'nocache'
+	    inside the FPL program. They force the file to remain in memory
+	    or not.
+
+	FPLTAG_KIDNAP_CACHED					(V9)
+	  (This is only usful in calls to fplExecuteScript().)
+	  Suppy a boolean to switch this on/off for this script/file. When
+	  enabled, FPL will duplicate all programs that should be cashed.
+	  By default, FPL will simply use the supplied program pointer,
+	  whether the program is cached or not. By using this tag, the host
+	  program can do whatever it wants with the memory after an execution,
+	  if if the program was cached.
+
+	  * Default for this state is set with the same tag to fplInit().
+
+	FPLTAG_DEBUG						(V9)
+	  Suppy a boolean to switch this on/off for this script/file. When
+	  enabled, FPL runs the program/script in 'debug mode'. Debug mode
+	  enables certain hooks and control stuff that wouldn't be done
+	  otherwise, and also always an external debugger to supervise the
+	  execution. "FPLdb" will be available in the future to provide a
+	  debugger for FPL usage on Amiga. The local status for debug mode
+	  can be altered and set with the debug() internal FPL function.
+
+	  * Default for this state is set with the same tag to fplInit().
+
+	FPLTAG_ISOLATE						(V13.7)
+	  Suppy a boolean to switch this on/off for this script/file. When
+	  enabled, FPL runs the program/script in 'protected mode', isolated
+	  from other previously run FPL programs. Isolated programs cannot
+	  access nor declare exported symbols. Symbols declared as 'export'
+	  when 'isolate' is active, will be made like ordinary globals.
+
+   RESULT
+	The error number, or zero (0) if everything was ok.
+
+   INPUTS
+	void *key		- Return value from fplInit().
+	char **program		- The FPL program to execute.
+	long lines		- Number of lines in the program.
+	unsigned long *tags 	- Pointer to a tag list.
+
+   SEE ALSO
+	fplExecuteFile
+
+fpl.library/fplExecuteFile                       fpl.library/fplExecuteFile
+
+   NAME
+	fplExecuteFile -- execute a file as an FPL program.
+	fplExecuteFileTags -- execute a file as an FPL program.
+
+   SYNOPSIS
+	long fplExecuteFile( key, filename, tags );
+	D0  		     A0	  A1        A2
+
+	For SAS/C users:
+	long fplExecuteFileTags( key, filename, ... );
+
+   FUNCTION
+	This function executes the file with the name pointed to by the
+	filename parameter according to the rules set by the fplInit()
+	function call. If any error occurs, the subroutine returns.
+	The program is loaded into memory before execution. If the program
+	didn't export any functions or if it shouldn't be cached, it will be
+	unloaded when the program exits.
+
+	fplExecuteFile() will internally read the given file and then call
+        fplExecuteScript().
+
+   TAGS
+	The tags are the same as for fplExecuteScript().
+
+   RESULT
+	The error number, or zero (0) if everything was ok.
+
+   INPUTS
+	void *key		- Return code from fplInit().
+	char *filename		- Pointer to the filename.
+	unsigned long *tags 	- Pointer to a tag list.
+
+   SEE ALSO
+	fplExecuteScript()
+
+fpl.library/fplGetErrorMsg                        fpl.library/fplGetErrorMsg
+
+   NAME
+	fplGetErrorMsg -- get error message from error number.
+
+   SYNOPSIS
+	char *fplGetErrorMsg( key, errnum, buffer );
+	D0      	      A0   D0      A1
+
+   FUNCTION
+	To get a verbose error message from the error number returned by
+	fplExecuteScript() or fplExecuteFile().
+	Giving this function a error number out of range, will cause the
+	library to return "Unknown" error. The buffer given to hold the error
+	message must be at least FPL_ERRORMSG_LENGTH bytes long.
+
+   NOTE
+	This should since V9 be replaced with the FPLTAG_ERROR_BUFFER tag to
+	fplInit()!
+
+   RESULT
+	A pointer to a zero terminated string.
+
+   INPUTS
+	void *key	- The return code of the initial fplinit() call.
+	long errnum	- Error number to get error message for.
+	char *buffer	- Buffer to store message in.
+
+   SEE ALSO
+	fplExecuteScript(), fplExecuteFile()
+
+fpl.library/fplAddFunction                   fpl.library/fplAddFunction
+
+   NAME
+	fplAddFunction -- add function to be recognized by FPL.
+	fplAddFunctionTags -- add function to be recognized by FPL.
+
+   SYNOPSIS
+	long fplAddFunction( key, name, ID, ret, format, tags );
+	D0                   A0   A1    D0  D1   A2      A3
+
+	For SAS/C users:
+	long fplAddFunctionTags( key, name, ID, ret, format, ... );
+
+   FUNCTION
+	This function adds a function to the FPL internal list of functions
+	to accept. All data pointed to by the different pointers here, must
+	remain unmodified (or at least existent, they may be changed any time
+	but the proper syntax must be respected) while FPL runs.
+
+	DO NOT add function identifiers with names longer than 64 characters.
+	Such function won't be recognized in an FPL program.
+
+	This function will be remembered as a function by FPL until fplFree()
+	(or fplDelFunction() naming this function) is invoked.
+
+	To achieve dynamic function names which might change during the
+	execution or from one execution time to the next, you can call this
+	function whenever you please and the function will be accepted when FPL
+	gets control again. To remove a function, use fplDelFunction(). You
+	can do this at _any_ time, even in the middle of an execution!)
+
+	If you want to add a function with the same name as an internal
+	function, or simply replace it, just fplDelFunction() the internal
+	function and then add your own using that name!
+
+   TAGS
+	* FPLTAG_FUNCDATA. This data is readable in the ->funcdata member of
+	  the fplArgument structure whenever this function is invoked. This
+	  gives you a great chance to pass local data between here and your
+	  interface function.
+
+	* FPLTAG_FUNCTION. This is a function specific function pointer to be
+	  called when this function is found in the FPL program. This enables
+	  unique function calls for each function you add to FPL. The function
+	  specified is called with the same argument and permissions as the
+	  `global' interface function.
+
+   RESULT
+	Zero if success, error code if failure.
+
+   INPUTS
+	void *key	- This is the data received from the initial
+			  fplInit() function call.
+
+	char *name	- Pointer to a zero terminated string holding the
+			  name of the function to add.
+
+	long ID		- Function ID. May be set to whatever you please to
+			  speed up function checks in the interface function.
+			  All subzero values are reserved for FPL use and
+			  calls.
+
+	char ret	- FPL_STRARG or FPL_INTARG depending on if this
+			  function is to return a string or an int to the
+			  caller. FPL_OPTARG means that the function can
+			  return either a string or an int. The return type
+			  is determined by FPL at run time, and you help a
+			  lot by *always* returing values from such functions
+			  since each fplSend() will tell FPL the kind of the
+			  return value.
+
+	char *format	- This is a pointer to a zero terminated array holding
+			  the argument specifiers for this function. You can
+			  make your function receive for types of arguments:
+			  strings, integers, string variables or integer
+			  variables. You can also specify optional parameters
+			  and/or parameter list. Available argument types are
+			  - 'S' (required 'string')
+			  - 's' (optional 'string')
+			  - 'I' (required 'int')
+			  - 'i' (optional 'int')
+			  - 'O' (required 'S' or 'I')
+			  - 'o' (optional 's' or 'i')
+			  - '>' (optional number of the previous type
+			        can be specified)
+
+			  From version 9, these are also available:
+			  - 'N' (required 'int' reference)
+			  - 'n' (optional 'int' reference)
+			  - 'C' (required 'string' reference)
+			  - 'c' (optional 'string' reference)
+			  - 'R' (required 'N' or 'C')
+			  - 'r' (optional 'n' or 'c')
+			  - 'A' (required 'S', 'I', 'N' or 'C')
+			  - 'a' (optional 's', 'i', 'n' or 'c')
+
+			  From version 10, these are also available:
+			  - 'B' (required 'string array reference')
+			  - 'b' (optional 'string array reference')
+			  - 'D' (required 'int array reference')
+			  - 'd' (optional 'int array reference')
+
+			  NOTE: the optional kinds *must* be specified to the
+			  right of the required ones!
+
+			  Examples:
+
+			  "ISi"
+			  means one required int, one required string
+			  and one optional int.
+
+			  "Si>"
+			  means one required string and any number of
+			  optional ints.
+
+	unsigned long *tags - Pointer to a tag list. See TAGS
+
+   SEE ALSO
+	fplDelFunction()
+
+fpl.library/fplAddVariable                      fpl.library/fplAddVariable
+
+   NAME
+	fplAddVariable -- add variable to be recognized by FPL.
+	fplAddVariableTags -- add variable to be recognized by FPL.
+
+   SYNOPSIS
+	long fplAddVariable( key, name, ID, type, default, tags );
+	D0                   A0   A1    D0  D1   A2       A3
+
+	For SAS/C users:
+	long fplAddVariableTags( key, name, ID, type, default, ... );
+
+   FUNCTION
+	This function adds a variable to the FPL internal list of variables
+	to accept. The name pointed to by the 'name' pointer here, must
+	remain unmodified while FPL runs.
+
+	DO NOT add variables with names longer than 64 characters.
+	Such a variable won't be recognized in an FPL program.
+
+	The variable will appear as any regular 'const' variable to the FPL
+	programmer. That is, it is read-only and any assign of such a
+	variable results in an error.
+
+	This variable will be remembered as a function by FPL until fplFree()
+	(or fplDelFunction() naming this variable) is invoked.
+
+   TAGS
+	No tags are currently (V10) supported!
+
+   RESULT
+	Zero if success, error code if failure.
+
+   INPUTS
+	void *key	- This is the data received from the initial
+			  fplInit() function call.
+
+	char *name	- Pointer to a zero terminated string holding the
+			  name of the function to add.
+
+	long ID		- Variable ID. May be set to whatever you please to
+			  speed up variable checks in the interface function.
+			  All subzero values are reserved for FPL use and
+			  calls. NOTE that variables and functions ought to
+			  get different IDs to prevent mixups!!
+
+	char type	- FPL_STRARG or FPL_INTARG depending on the intended
+			  type of this variable. No other type is valid!
+
+	void *default	- Default value of the variable. If this is a string
+			  that's added, this should point to a zero terminated
+			  string that's copied into the new variable, and if
+			  this is an integer variable, it should be an
+			  integer!
+
+	unsigned long *tags - Pointer to a tag list. See TAGS
+
+   SEE ALSO
+	fplAddFunction(), fplDelFunction()
+
+fpl.library/fplDelFunction                       fpl.library/fplDelFunction
+
+   NAME
+	fplDelFunction -- remove function definition.
+
+   SYNOPSIS
+	long fplDelFunction( key, name );
+	D0                   A0   A1
+
+   FUNCTION
+	As the name hints you about, this function removes a named
+	function from the FPL internal identifier cach. After this
+	call the named function will no longer be recognized.
+
+	You can do this with any of the internal FPL functions too,
+	which has to be done if you want to add your own function
+	using the same name as a FPL internal function (or replacing
+	it with one which you think work better).
+
+	NOTE: You don't have to fplDelFunction() every function you
+	have fplAddFunction()'ed. fplFree() will take care of that
+	for you.
+
+   RESULT
+	Zero if everything was ok, otherwise an error code.
+
+   INPUTS
+	void *key	- The return code of the initial fplInit().
+	char *name	- Pointer to the function name (zero terminated).
+
+   SEE ALSO
+	fplAddFunction(), fplAddVariable()
+
+fpl.library/fplFree                                     fpl.library/fplFree
+
+   NAME
+	fplFree -- clean up all resources used by FPL.
+
+   SYNOPSIS
+	void fplFree( key );
+		      A0
+
+   FUNCTION
+	When you have used FPL for the last time in your program, use
+	this function to make FPL free it's internal buffers and resources.
+	This call will make the data received from the initial fplInit()
+	useless.
+
+	NOTE: You do not have to make a fplDelFunction() for every
+	function you've added. It's enough with a call to fplFree().
+
+	NOTE2: If you intend to use FPL again in the same session, avoid
+	the overhead of doing fplFree() after every invoke of an FPL program.
+	My suggestion is, in all normal cases, an fplInit() call when starting
+	your program and an fplFree() call just before you exit it.
+
+   INPUTS
+	void *key	- The return code of the initial fplInit().
+
+   SEE ALSO
+	fplInit()
+
+fpl.library/fplInit                                    fpl.library/fplInit
+
+   NAME
+	fplInit -- intializes an FPL usage session.
+
+   SYNOPSIS
+	void *fplInit( function, tags );
+
+	void *fplInitTags( function, ... );
+
+   FUNCTION
+	This function initializes the FPL internal buffers and caches and
+	allocates the new stack to use when the library is invoked.
+	This function *MUST* be called the first thing you do when you want
+	to use any functions in FPL. The return code of this function is
+	used as parameters in several of the other FPL functions. Can be called
+	several times using the same library base if wanted.
+
+	Each call to fplInit() should have a corresponding call to fplFree().
+
+   TAGS
+	FPLTAG_ALLFUNCTIONS					(V5.3)
+	  This tag enables/disables the FPL_UNKNOWN_FUNCTION ID. If that ID is
+	  sent to the interface function, it means that the function just
+	  interpreted was not found in the FPL internal lists. When this tag
+	  is enabled, all function names will always be interpreted as best as
+	  it can be done, no functions will be reported as "identified
+	  unknown". Default is disabled.
+
+	FPLTAG_HASH_TABLE_SIZE					(V5)
+	  Specified the size of the hash table to use. Default is 67, and any
+	  size below 10 is ignored. Set this *ONLY* at the fplInit() call!!!
+	  Highest performance will be achieved if this is a prime number.
+
+	FPLTAG_INTERVAL
+	  Specifies the interval function which is called every now and then
+	  to enable external processes to stop the FPL program. Returning
+	  non-zero stops the program with a FPL_PROGRAM_STOPPED error code.
+
+	FPLTAG_NEWLINE_HOOK
+	  Obsolete from version 9!
+
+	FPLTAG_USERDATA
+	  Data to send to the interval function. Readable with the
+	  FPLSEND_USERDATA tag to the fplSend() function.
+
+	FPLTAG_INTERNAL_ALLOC					(V3)
+	  With this tag you specify a function pointer that will be called
+	  instead of the internal AllocMem()/malloc() function. This has to be
+	  a "void *(*function)(long size, void *userdata)" function. Amiga
+	  programmers will find the size argument in register D0 and the
+	  userdata in A0.
+
+	  When using this, all FPL allocations will be made using this
+	  function, although FPL has it's own memory caching/recycling system.
+
+	FPLTAG_INTERNAL_DEALLOC					(V3)
+	  Specifies a function pointer to be called instead of the internal
+	  FreeMem()/free() function. The function must be a
+	  "void (*function)(void *pointer, long size, void *userdata)"
+	  function. Amiga programs will receive the arguments in A1 and D0
+	  (just as FreeMem() wants them...) and userdata in A0.
+
+	FPLTAG_CACHEALLFILES					(V3)
+	  Turn on or off default FPL caching. Default is FPLCACHE_NONE.
+
+	  Cashing can be done in three ways:
+	  FPLCACHE_NONE    - Will never ever cache a file
+	  FPLCACHE_ALWAYS  - Will cache files that have one or more global
+			     symbols
+	  FPLCACHE_EXPORTS - Will only cache files that have exported symbols.
+
+	  (The execute tag 'FPLTAG_CACHEFILE' can change this on a single
+	  program basis. FPLTAG_CACHEALLFILES sets the default cache switch.)
+
+	  NOTE: Files that do not declare any global symbols will not be
+	  cached, no matter what this tag says!
+
+	FPLTAG_REREAD_CHANGES					(V8)
+	  Suppy a boolean to switch this default to on/off. When enabled all
+	  files that are attempted to be ran with the actual file modified on
+	  disk, will get all symbols declared in the file removed and the new
+	  version loaded and run instead.
+
+	  * Individual files can be altered with the same tag to
+	    fplExecuteScript() and fplExcuteFile().
+	  * This can be forced on/off with the pragmas 'reread' and 'noreread'
+	    inside the FPL program.
+	  * This tag will only be of use for calls to fplExecuteFile().
+
+	FPLTAG_FLUSH_NOT_IN_USE					(V8)
+	  Suppy a boolean to switch this default to on/off. When enabled, all
+	  files that aren't in use will be flushed from memory and read into
+	  memory again when accessed.
+
+	  * Individual files can be altered with the same tag to
+	    fplExecuteScript() and fplExcuteFile().
+	  * This can be forced with the pragmas 'cache' and 'nocache'
+	    inside the FPL program. They force the file to remain in memory
+	    or not.
+
+	FPLTAG_IDENTITY						(V9)
+	  During debug mode, a possible external debugger should get a real
+	  name of each FPL using process that keeps them apart. All users
+	  of FPL should make the supplied pointer to this tag point to a
+	  unique string as an ID of this process.
+	  FPL will *not* copy any data from the pointer, but simply read from
+	  it from time to time. NULL is the same as not specifying anything.
+
+	FPLTAG_DEBUG						(V9)
+	  See the tag with the name name under the fplExecuteScript()
+	  description!
+
+	FPLTAG_KIDNAP_CACHED					(V9)
+	  See the tag with the name name under the fplExecuteScript()
+	  description!
+
+	FPLTAG_ERROR_BUFFER					(V9)
+	  The supplied char pointer should point to at least
+	  FPL_ERRORMSG_LENGTH free bytes. If FPL encounters an error, this
+	  buffer will be filled with a zero terminated error message string
+	  just before the FPL_GENERAL_ERROR message is sent to the interface
+	  function!
+	  This tag should be used *prior* to the fplGetErrorMsg() function
+	  which from now on is declared not-to-be-used.
+
+	FPLTAG_PREVENT_RUNNING_SAME				(V10)
+	  If this tag is set to TRUE, no programs are allowed to get executed
+	  a second time (that is, if the program is already cashed).
+	  The FPLTAG_REREAD_CHANGES tag still works fine with this though.
+
+
+	  Amiga-only tags:
+
+	FPLTAG_STACK
+	  Startup stack size. Any size below 8000 bytes is ignored!
+
+	FPLTAG_MAXSTACK.
+	  After one execution with possible stack expandings, this specified
+	  size is the maximum memory area that still will be allocated by FPL
+	  to use in the next execution as stack. (This is done like this to
+	  prevent FPL to have to enlarge the stack on every execution if
+	  memory is available!) Default is 20000 bytes.
+
+	FPLTAG_STACKLIMIT.
+	  The very largest memory size that FPL is permitted to use as stack.
+	  This prevents the user of writing too recursive FPL programs. Try a
+	  few programs to see which setting you think fits best in your
+	  surrounding. Default is 40000 bytes.
+
+	FPLTAG_MINSTACK.
+	  Obsolete!
+
+	FPLTAG_LOCKUSED.
+	  This tag makes FPL to keep the lock on a file until it doesn't need
+	  the file anymore. Using this tag enables a higher security level of
+	  the FPL environment since no files can be removed or changed while
+	  they are needed by FPL. Locks will be removed when the program is
+	  not necessary any more or when fplFree() is called.
+
+   NOTE
+	*WARNING* FPLTAG_INTERNAL_ALLOC and FPLTAG_INTERNAL_DEALLOC can be
+	patched run-time. If you do that, memory that has been allocated using
+	the first function, might get freed by the new patch. This can be
+	looked upon as a bug, but sure as well a feature. THESE TAGS MUST BE
+	USED WITH CAUTION!
+
+   RESULT
+	Non-zero if everything was ok, otherwise NULL. This return code is used
+	as input to all other FPL functions. Don't mess with it!
+
+	The return code will remain the same during the entire FPL session.
+	That enables you to store this in a global variable to be able to reach
+	it everywhere without problems.
+
+   INPUTS
+	long (*function)(struct fplArgument*) - Pointer to the interface
+						function.
+	unsigned long *tags		      - Taglist pointer!
+
+   SEE ALSO
+	fplReset(), fplFree()
+
+fpl.library/fplReset                                    fpl.library/fplReset
+
+   NAME
+	fplReset -- reset tags set in the fplInit() call.
+	fplResetTags -- reset tags set in the fplInit() call.
+
+   SYNOPSIS
+	long fplReset( key, tags );
+	D0	       A0   A1
+
+	For SAS/C users:
+	long fplResetTags( key, ... );
+
+   FUNCTION
+	This function is used to set fplInit() tags, after the fplInit() call.
+	If you'd like to change any given data or perhaps add a tag dynamically
+	between two FPL runs, this is the function for you!
+
+   TAGS
+	All fplInit() tags are available.
+
+   RESULT
+	Zero if ok, otherwise a non-zero error code!
+
+   INPUTS
+	void *key		- The return code of the initial fplInit().
+	unsigned long *tags	- Taglist pointer!
+
+   SEE ALSO
+	fplInit()
+
+fpl.library/fplSend                                     fpl.library/fplSend
+
+   NAME
+	fplSend -- multi purpose FPL communication.
+	fplSendTags -- multi purpose FPL communication.
+
+   SYNOPSIS
+	long fplSend( key, tags );				(V3)
+	D0            A0   A1
+
+	For SAS/C users:
+	long fplSendTags( key, ... );
+
+   FUNCTION
+	There is always communication between FPL and the host program. FPL
+	communicates by calling the interface function, you answer by calling
+	fplSend() with different arguments. This is the general function for
+	responding to, or getting information from, FPL.
+
+	To return values to FPL from the interface function use this. Only use
+	one of the data sending tags in the same function call (tags marked
+	with "**").
+
+	The tags are read in the same order as sent. That means that you can,
+	in cases where you should specify several tags, rely on the evaluation
+	order and specify them all in one call.
+
+
+
+   TAGS
+	(Tags marked with two asterisks "**", are mutely exclusive. That means
+	you may only specify one of those in each fplSend() call!)
+
+	** FPLSEND_CONFIRM
+	  Used to confirm or deny an FPL action. This tag answers TRUE or
+	  FALSE. Ex: when a program supplied by you is allowed and about to be
+	  flushed, FPL will call you with the FPL_FLUSH_FILE ID and you must
+	  return a positive confirmation if you flushed.
+
+	** FPLSEND_STRING
+	  Sends a string pointer for FPL to copy. Use this only if the current
+	  function is supposed to return a string. See also the FPLSEND_STRLEN
+	  tag. A NULL pointer is treated the same as a pointer to a zero length
+	  string.
+
+	  FPLSEND_STRLEN
+	  Used together with FPLSEND_STRING. This informs FPL about the length
+	  of the sent string. If you set this to a negative number (or don't
+	  set it at all), FPL will perform a strlen() on the associated string
+	  pointer to get the length of it.
+
+	  FPLSEND_DONTCOPY_STRING				(V6)
+	  Enter TRUE/FALSE, default is FALSE. Use this tag if the string sent
+	  to FPL is allocated with fplAllocString(). That will tell FPL to not
+	  duplicated the entered string, but instead using it as it is. Do not
+	  modify the string in any way after calling fplSend() with this tag.
+
+	** FPLSEND_INT
+	  Sends an integer value to FPL. Use this only if the current function
+	  is supposed to return an integer.
+
+	* FPLSEND_FLUSHCACHE
+	  Tells FPL to flush (empty) all internal memory caches. This will
+	  bring more free memory to the system, but also make FPL require a
+	  larger number of allocations.
+
+	* FPLSEND_FLUSHFILE
+	  If a file name is specified, that file will be flushed from memory if
+	  not in use and not previously flushed. Specifying zero (0) will
+	  flush all files in memory that fits the same description. Even files
+	  that have been declared to remain cached will be flushed when this is
+	  used.
+
+	* FPLSEND_FREEFILE
+	  Deletes all functions that are currently associated with the file
+	  name you specify as data to this tag.
+
+	* FPLSEND_GETCOLUMN
+	  Supply a pointer to a `long' to receive the number of the current
+	  column the interpreter is working on.
+	  NOTE: If using fplExecuteFile(), the program will always be read as
+	  if it was on one single line which will make the column number to be
+	  very large sometimes.
+
+	* FPLSEND_GETFUNCTION					(V5)
+	  Supply a pointer to a fuunction pointer to receive the pointer to
+	  the current interface function.
+
+	* FPLSEND_GETINTERVAL					(V5)
+	  Supply a pointer to a fuunction pointer to receive the pointer to
+	  the current interval function.	
+
+	* FPLSEND_GETLINE
+	  Supply a pointer to a `long' to receive the number of the current
+	  line the interpreter is working on.
+	  NOTE: If using fplExecuteFile(), the program will always be read as
+	  if it was on one single line which will make this tag always return
+	  1.
+
+	* FPLSEND_GETNEWLINE_HOOK				(V5)
+	  Supply a pointer to a fuunction pointer to receive the pointer to
+	  the current newline hook function.	
+
+	* FPLSEND_GETPROG					(V5)
+	  Supply a pointer to a char pointer and you'll receive a pointer to
+	  the current (now interpreting or last interpreted) program. If the
+	  program wasn't accesible by some reason, a NULL pointer will be
+	  returned. Use this for e.g. count the lines of a program loaded
+	  with fplExecuteFile().
+
+	* FPLSEND_GETPROGNAME
+	  Supply a pointer to a char pointer and you'll receive a pointer to
+	  the current (now interpreting or last interpreted) program name.
+	  (See also the FPLTAG_PROGNAME tag for the fplExecute#? functions.)
+
+	* FPLSEND_GETRESULT
+	  Supply a pointer to a 'long' to receive the number returned by the
+	  last interval function call.
+
+	* FPLSEND_GETRETURNCODE
+	  Supply a pointer to a `long' to receive the value returned in the
+	  last return() or exit() call in the FPL program.
+
+	* FPLSEND_GETRETURNINT					(V10)
+	  Supply a pointer to a `long *' to receive a pointer to the value
+	  returned in the last return() or exit() call in the FPL program.
+	  If no value was returned, this will return NULL.
+
+	* FPLSEND_GETSTACKSIZE
+	  (Amiga only) Supply a pointer to a `long' to receive the current
+	  stack size.
+
+	* FPLSEND_GETSTACKUSED
+	  (Amiga only) Supply a pointer to a `long' to receive the current
+	  amount stack used.
+
+	* FPLSEND_GETSYMBOL_FUNCTIONS
+	  FPLSEND_GETSYMBOL_MYFUNCTIONS
+	  FPLSEND_GETSYMBOL_FPLFUNCTIONS
+	  FPLSEND_GETSYMBOL_VARIABLES
+	  FPLSEND_GETSYMBOL_CACHEDFILES
+	  FPLSEND_GETSYMBOL_ALLVARIABLES			(V5)
+	  FPLSEND_GETSYMBOL_ALLFUNCTIONS			(V5)
+
+	  Supply a struct fplSymbol ** (pointer to a fplSymbol struct pointer)
+	  and receive data about the current FPL status!
+
+	  FUNCTIONS means all exported and external functions
+	  MYFUNCTIONS means only all external functions
+	  FPLFUNCTIONS means only by FPL exported functions.
+	  VARIABLES means all exported variables
+	  CACHEDFILES means all cached files' names
+	  ALLVARIABLES means *all* current variables even locals
+	  ALLFUNCTIONS means *all* current functions even locals
+
+	  FPLSEND_GETSYMBOL_FREE
+	  Must be called after each of the above with the fplSymbol pointer as
+	  data.
+
+	* FPLSEND_GETUSERDATA
+	  Supply a pointer to a `long' to receive the userdata specified in the
+	  `FPLTAG_USERDATA' tag's data field in the fplInit() call. If that
+	  tag wasn't specified, NULL is returned.
+
+	* FPLSEND_GETVIRLINE					(V5.3)
+	  Supply a pointer to a `long' to receive the virtual line number.
+	  The virtual line number is in normal cases the desired line number
+	  you want. It is simply a counter of the amount of newlines from the
+	  top of the file to the current position.
+
+	  See also: #line instruction in FPLuser.guide
+
+	* FPLSEND_GETVIRFILE					(V5.3)
+	  Supply a pointer to a char pointer, and you'll receive the virtual
+	  file name. The virtual file name is usually the name of the current
+	  file. The file name is zero terminated if it's _not_ started with a
+	  quotation mark. If a quotation mark is the first character of the
+	  file name, the file name is also ended with a quotation mark and
+	  not with a zero byte! After a program execution, this will return
+	  NULL!
+
+	  See also: #line instruction in FPLuser.guide
+
+	* FPLSEND_PROGRAMFILE
+	  When using non-cached files and FPL requires a file using the
+	  FPL_FILE_REQUEST, you return the file name where FPL can load the
+	  FPl program using this tag. The program must not been changed since
+	  FPL played with it last time!
+	  The name must be zero terminated.
+
+	** FPLSEND_PROGRAM
+	  When using non-cached files and FPL requires a file using the
+	  FPL_FILE_REQUEST, you return the program array pointer using this
+	  tag. The program must not been changes since FPL played with it last
+	  time!
+
+	* FPLSEND_SETPROGNAME
+	  Supply a pointer to the new name of the current program.
+	  See FPLTAG_PROGNAME.
+
+	* FPLSEND_SETFILENAMEGET
+	  Supply a boolean whether FPL can get flushed file from the file named
+	  as the program name. See FPLTAG_FILENAMGET.
+
+	* FPLSEND_STEP
+	  Moves the current interpret position forward or backward a number of
+	  characters. Especially when a FPL_WARNING is received, this function
+	  might be useful. For example, if a FPL_MISSING_BRACKET occurs on a
+	  line like `foobar[2[="username"'; The warning will appear at the
+	  postion 	     ^ and try to continue there if a confirm is sent
+	  back. A continuation that will lead to a dead end error if the
+	  interpret position isn't moved first one character forward.
+
+	  Using a negative number moves it backwards, positive forwards.
+
+	  If the beginning, or end, of program was reached, FPL_UNEXPECTED_END
+	  is returned.
+
+	  WARNING! This must be used with common sense! Moving the interpret
+	  position without a reason as above or similar, will deeply confuse
+	  FPL, which likely starts reporting mysterious errors and in other
+	  ways act strange.
+
+	* FPLSEND_RESULT					(V10)
+	  Supply a pointer to a long that fplSend() can use to store extra
+	  return code informations in! The adress will be remembered by FPL
+	  and repeated calls with the tags that use this do not need to set
+	  this!
+
+	* FPLSEND_IS_FILE_CACHED				(V10)
+	  Supply a pointer to the program name. The long to which the
+	  FPLSEND_RESULT tag points to will hold TRUE if the program is
+	  cached, and FALSE if it isn't.
+
+   RESULT
+	Zero if ok, otherwise a standard FPL error code.
+
+   INPUTS
+	void *key	- The return code of the fplInit() call.
+	unsigned long *	- A taglist pointer.
+
+   SEE ALSO
+
+fpl.library/fplAlloc                                 fpl.library/fplAlloc
+
+   NAME
+	fplAlloc -- allocate memory and bind to the FPL resource list.
+
+   SYNOPSIS
+	void *fplAlloc( key, size );			 (V3)
+	D0		A0   D0
+
+   FUNCTION
+	This function allocates memory and attaches it to the current internal
+	list of memory used in this FPL session. All memory in that list will
+	be freed at the fplFree() call. Single memory areas allocated with this
+	function can be freed with fplDealloc().
+
+	If you have patched the FPL allocation routine, this will eventually
+	call that function to allocate.
+
+	This allocation works like the C language malloc(), which means that it
+	always allocates 12 extra bytes to store allocation information in.
+
+	Future versions of FPL might get special fplSend() tags to use if you
+	have fplAlloc()'ed memory that you send to it to reduce the situations
+	where you allocate memory for a string, send it to FPL which allocates
+	again and copies your data, and then you free your memory again... One
+	too many allocations I think!
+
+   RESULT
+	A pointer to an allocated memory area, or NULL if the allocation
+	failed.
+
+   INPUTS
+	void *key	- The return code of the fplInit() call.
+	unsigned long 	- Size of allocation.
+
+   SEE ALSO
+	fplAlloca(), fplDealloc(), fplDealloca()
+
+fpl.library/fplDealloc                                fpl.library/fplDealloc
+
+   NAME
+	fplDealloc -- deallocated memory allocate with fplAlloc().
+
+   SYNOPSIS
+	void fplDealloc( key, pointer );		 (V3)
+			 A0   A1
+
+   FUNCTION
+	This function frees memory previously allocated by fplAlloc(). Using
+	this on memory allocated by any other memory will trash memory and
+	the resulting happenings are really not known!
+
+	If you have patched the FPL deallocation routine, this will eventually
+	call that function to free.
+
+   INPUTS
+	void *key	- The return code of the fplInit() call.
+	void *pointer 	- Pointer to a previosly fplAlloc()'ed memory area.
+
+   SEE ALSO
+	fplAlloca(), fplAlloc(), fplDealloca()
+
+fpl.library/fplAlloca                                fpl.library/fplAlloca
+
+   NAME
+	fplAlloca -- allocate memory and bind to the FPL program running.
+
+   SYNOPSIS
+	void *fplAlloca( key, size );			 (V4)
+	D0		 A0   D0
+
+   FUNCTION
+	This function allocates memory and attaches it to the current internal
+	list of memory used for this FPL session. All memory in that list will
+	be freed at the fplFree() call or when the current program exits.
+	Single memory areas allocated with this function can be freed with
+	fplDealloca().
+
+	If you have patched the FPL allocation routine, this will eventually
+	call that function to allocate, even though this allocation is using
+	the internal FPL memory chaches, which might give us memory without
+	calling that allocate function!
+
+	This allocation works like the C language malloc(), which means that
+	it always allocates 12 extra bytes to store allocation information in.
+
+   RESULT
+	A pointer to an allocated memory area, or NULL if the allocation
+	failed.
+
+   INPUTS
+	void *key	- The return code of the fplInit() call.
+	unsigned long 	- Size of allocation.
+
+   SEE ALSO
+	fplAlloc(), fplDealloc(), fplDealloca()
+
+fpl.library/fplDealloca                              fpl.library/fplDealloca
+
+   NAME
+	fplDealloca -- dealloc memory allocated with fplAlloca().
+
+   SYNOPSIS
+	void fplDealloca( key, pointer );		 (V4)
+			  A0   A1
+
+   FUNCTION
+	This function frees memory previously allocated by fplAlloca(). Using
+	this on memory allocated by any other memory will trash memory and
+	the resulting happenings are really not known!
+
+	If you have patched the FPL deallocation routine, this might eventually
+	call that function to free if the memory area does not remain in the
+	FPL memory cache.
+
+   INPUTS
+	void *key	- The return code of the fplInit() call.
+	void *pointer 	- Pointer to a previosly fplAlloca()'ed memory area.
+
+   SEE ALSO
+	fplAlloca(), fplDealloc(), fplAlloc()
+
+fpl.library/fplAllocString                              fpl.library/fplAllocString
+
+   NAME
+	fplAllocString -- allocate memory for an FPL string.
+
+   SYNOPSIS
+	void *fplAllocString( key, size);		 (V6)
+			      A0   D0
+
+   FUNCTION
+	This function allocates memory and prepares the memory block for
+	holding an FPL string. Using this to allocate memory and then
+	using the 'FPLSEND_DONTCOPY_STRING' tag in the fplSend() call when
+	sending the allocated string to FPL, tells FPL not to duplicate
+	the sent string, but simply using the supplied one.
+
+	Strings allocated with fplAllocString() should have a matching
+	fplFreeString(). Note that when i.g, sending the string to FPL with
+	the 'FPLSEND_DONTCOPY_STRING' tag, FPL will do the freeing and
+	not the user program!
+
+   INPUTS
+	void *key	- The return code of the fplInit() call.
+	long size	- The length of the string to create. Which is the
+			  same as the size of the memory block to get hands
+			  on.
+
+   RESULT
+	Returns a pointer to the requested memory area. The memory is set up
+	to be used as an FPL string (but you won't notice that).
+
+   EXAMPLE
+	Previous code that send a string to FPL could look like:
+		{
+		  char *data= malloc(1000); /* allocate */
+		  strcpy(data, otherdata);  /* copy data *
+		  fplSendTags(key, FPLSEND_STRING, data, TAG_DONE);
+		  /* FPL duplicates the data sent */
+		  free(data); /* free */
+		}
+
+	Code using the new fplAllocString() function could replace the
+	old one like:
+		{
+		  char *data = fplAllocString(key, 1000); /* allocate */
+		  strcpy(data, otherdata);  /* copy data */
+		  fplSendTags(key, FPLSEND_STRING, data,
+				   FPLSEND_DONTCOPY_STRING, TRUE,
+				   TAG_DONE);
+		  /* FPL uses the user's allocation, no extra duplication */
+		}
+
+   SEE ALSO
+	fplAlloc(), fplFreeString()
+
+fpl.library/fplFreeString                              fpl.library/fplFreeString
+
+   NAME
+	fplFreeString -- free FPL string memory.
+
+   SYNOPSIS
+	void fplFreeString( key, string);		 (V6)
+			     A0   A1
+
+   FUNCTION
+	This function frees the memory associated with an FPL string. Other
+	memory areas should and can not be freed with this function. Such an
+	attempt will most likely damage running programs.
+
+	This function should be called after each call to fplAllocString().
+
+   INPUTS
+	void *key	- The return code of the fplInit() call.
+	char *string	- The return code an fplAllocString() call.
+
+   EXAMPLE
+	When using the fplExecuteScript() tag 'FPLTAG_STRING_RETURN' the
+	returned string should be freed using fplFreeString():
+		{
+		  char *string;
+		  fplExecuteScriptTags(key, array, lines,
+				       FPLTAG_STRING_RETURN, &string,
+				       FPLTAG_DONE);
+		  if(string) {
+		    printf("The program returned '%s'\n", string);
+		    fplFreeString(key, string); /* free string */
+		  }
+		  else
+		    printf("No string returned!\n");
+		}
+
+   SEE ALSO
+	fplDealloc(), fplAllocString()
+
+fpl.library/fplOpenLib                              fpl.library/fplOpenLib
+
+   NAME
+	fplOpenLib -- open funclib.
+
+   SYNOPSIS
+	long fplOpenLib( key, funclib, version, flags);		 (V7)
+			 A0   A1       D0       D1
+
+   FUNCTION
+	Opens a funclib. This does mainly the same as the 'openlib' FPL
+	function. Good to use when you want your software to open funclibs
+	as default. Funclibs opened with this function can be made impossible
+	to close from FPL (see the flags parameter).
+
+	If the funclib is already opened, the open counter is simply
+	increased.
+
+   INPUTS
+	void *key	- The return code of the fplInit() call.
+	char *funclib	- The name of the funclib to open.
+	long version	- The lowest acceptable funclib version.
+	long flags	- Extra open information. These flags are available:
+
+	FPLLIB_KEEP: A funclib opened with this flag set cannot be closed with
+	an ordinary 'closelib' but must be closed using the FPLLIB_FORCE flag
+	to fplCloseLib()!
+
+   RESULT
+	Zero if ok. If the result is a positive number it is a standard FPL
+	error code, and if it is a negative number, it is an error code
+	returned from the funclib. The numbers mean:
+	-1 = the funclib was called with an illegal parameter
+	-2 = funclib internal error
+	-3 = failed getting system resource (pipe, message port, etc)
+	-4 = out of memory
+	-5 = couldn't load funclib (most likely, the funclib is missing)
+	-6 = the requested version didn't exist
+
+	More error codes will be added in the future.
+
+   EXAMPLE
+	Make your program use the funclib "foobar" version 2 from startup:
+		{
+		  long success;
+		  success = fplOpenLib(key, "foobar", 2, FPLLIB_NONE);
+		  if(0 == success)
+		    printf("We failed to opened the funclib!\n");
+		}
+
+   SEE ALSO
+	fplCloseLib()
+
+fpl.library/fplCloseLib                              fpl.library/fplCloseLib
+
+   NAME
+	fplCloseLib -- close funclib.
+
+   SYNOPSIS
+	long fplCloseLib( key, funclib, flags )			 (V7)
+			  A0   A1       D0
+
+   FUNCTION
+	Closes a funclib. This does mainly the same as the 'closelib' FPL
+	function. Good to use when you want your software to close funclibs.
+	Funclibs opened with the FPLLIB_FORCE flag set can only be closed
+	using this function.
+
+	The funclib isn't entirely removed until the open counter of the
+	funclib has reached zero. To force removal, without considering
+	the open counter, the FPLLIB_FORCE flag must be used.
+
+   INPUTS
+	void *key	- The return code of the fplInit() call.
+	char *funclib	- The name of the funclib to open. If set to NULL,
+			  *all* funclib will be closed.
+	long flags	- Extra close options. These flags are available:
+
+	FPLLIB_FORCE: A funclib opened with this flag set cannot be closed with
+	an ordinary 'closelib' but must be closed using the FPLLIB_FORCE flag
+	to fplCloseLib()!
+
+   RESULT
+	Zero if ok. If the result is a positive number it is a standard FPL
+	error code, and if it is a negative number, it is an error code
+	returned from the funclib. See fplOpenLib() for more details.
+
+   EXAMPLE
+	Make your program use the funclib "foobar" version 2 from startup:
+		{
+		  long success;
+		  success = fplOpenLib(key, "foobar", 2, FPLLIB_NONE);
+		  if(0 == success)
+		    printf("We failed to opened the funclib!\n");
+		}
+
+   SEE ALSO
+	fplCloseLib()
+
+fpl.library/fplReference                            fpl.library/fplReference
+
+   NAME
+	fplReference -- handle variable references
+
+   SYNOPSIS
+	long fplReference( key, referID, tags)			(V9)
+			   A0   A1       A2
+
+	For SAS/C users:
+	long fplReferenceTags( key, referID, ...)
+
+   FUNCTION
+	Whenever an external function is called (through the regular
+	interface function) and one or more of the parameters is a variable
+	reference, this function can be used to read and write information
+	about that variable.
+
+   TAGS
+	FPLREF_TYPE
+	  Supply this tag a pointer to a long, and this function will fill in
+	  the bits that matches this variable type! The bits that can be
+	  filled are:
+	  FPLREF_TYPE_STRING	- The symbol is a string
+	  FPLREF_TYPE_INTEGER	- The symbol is an integer
+	  FPLREF_TYPE_ARRAY	- The symbol is a variable array (V10)
+
+	  (no other are supported today, more are likely to appear in the
+	  future)
+
+	FPLREF_NAME
+	  Supply this tag a pointer to a char pointer, and FPL will store a
+	  pointer to this variable's name in there. The name is a zero
+	  terminated string.
+
+	FPLREF_GET_STRING
+	  If this variable is a string, supply a pointer to a char pointer,
+	  and FPL will store a pointer to this variable's contents in that,
+	  or NULL if it was an integer!
+	  The pointer will point to a regular FPL string, and the length
+	  of it is readable through the FPLSTRLEN() macro as usual.
+
+	FPLREF_SET_STRING
+	  If this variable is a string, supply a pointer to a previously
+	  fplAllocString() string, and FPL will replace this variable's
+	  contents with this new string! The string MUST NOT be deallocated
+	  by the program, but FPL will take care of that.
+
+	FPLREF_GET_INTEGER
+	  If this variable is an integer, supply a pointer to a long pointer,
+	  and FPL will store a pointer to the contents of this variable, or
+	  NULL if it wasn't an integer!
+
+	FPLREF_SET_INTEGER
+	  If this variable is an integer, supply a long that will be stored
+	  as this variable's new contents!
+
+	FPLREF_ARRAY_INFO					(V10)
+	  Specify a pointer to a "struct fplRef" and information about the
+	  referenced array will be returned.
+	  The information pointed to by the 'ArraySize' field is READ-ONLY. Do
+	  not mess with that data!
+
+	FPLREF_ARRAY_ITEM					(V10)
+	  Suply a pointer to a long array terminated with a '-1' value,
+	  holding the array dimension information about which specified
+	  array item you wish to read/write. I.e if the array is an integer
+	  array declared as 'foobar[10][20]' and your program wants to modify
+	  the item 'foobar[5][6]', the array should look like {5, 6, -1}.
+	  By setting the array item first in the taglist, you can read and
+	  write single items with the usual (pre V10) tags!
+
+	FPLREF_SET_MY_STRING					(V10)
+	  Like FPLREF_SET_STRING except that this tag needs a regular char
+	  pointer to a regular memory area holding the string, no kind of
+	  FPL-string is required. The length of the strint is either read
+	  by FPL trough a strlen() call, or set with the tag below, before
+	  this tag in the taglist!
+
+	FPLREF_SET_MY_STRLEN					(V10)
+	  Supply the length of the string you're about to set with
+	  FPLREF_SET_MY_STRING. Use this tag before the strint set tag!
+
+	FPLREF_ARRAY_RESIZE					(V11)
+	  Supply a pointer to a filled in fplRef struct, and the referenced
+	  array will be resized according to your settings. Note that you
+	  are allowed to change number of dimenstions, allthough you're
+	  encouraged not to. It would confuse the users a lot!
+	  Resizing to smaller arrays may cause a loss of data that will be
+	  lost unrecoverable. See further in the keyword 'resize' paragragh!
+
+   INPUTS
+	void *key	- The return code of the fplInit() call.
+	void *referID	- Reference ID as received in the interface function.
+			  This ID should *never* be used in any other way than
+			  to be sent to FPL. Don't think that the same
+			  variable will have the same ID twice or anything
+			  similar.
+   RESULT
+	Zero if ok, otherwise a standard FPL error code.
+
+   EXAMPLE
+	We added a function to FPL with a format string like "R" (one required
+	variable reference to a string or an integer). To get the type and the
+	name of the received variabl, we use the following code:
+
+	char *name;
+	long type;
+	lonf *tags[]={
+	  FPLREF_TYPE, NULL,	/* get type */
+	  FPLREF_NAME, NULL,	/* get name */
+	  FPLREF_DONE
+	};
+	tags[1] = (long)&type;
+	tags[3] = (long)&name;
+	fplReference(key,		/* fplInit() return code */
+		     arg->argv[0],	/* refer ID!             */
+		     tags);
+
+	if(type&FPLREF_TYPE_STRING)
+	  printf("The variable named '%s' is a string!\n", name);
+	if(type&FPLREF_TYPE_INTEGER)
+	  printf("The variable named '%s' is an integer!\n", name);
+
+
+   SEE ALSO
+	<FPL/Reference.h>

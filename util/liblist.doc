@@ -1,0 +1,55 @@
+             LibList 1.4 - A shared library viewer/modifier
+             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ *****************************************************************************
+ LibList v1.4 is Copyright (C) 1994 by FrexxWare!
+ Written by Daniel Stenberg
+
+ This program is distributed in the hope that it will be useful, but WITHOUT
+ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ FITNESS FOR A PARTICULAR PURPOSE.
+ *****************************************************************************
+
+Permission is granted to freely distribute this program for
+non-commercial purposes only. LibList is distributed "as is"
+without warranty of any kind.
+
+LibList lists all libraries currently in memory and has a few
+small extra functions that helps you handle libraries!
+
+I made this little utility while developing FPL, since it helped me a lot
+to e.g keep two versions of the same library in memory simultanously (through
+the PUSH parameter), kill libraries that are left in memory and by accident
+never was closed properly (through the KILL parameter) and make programs use
+libraries that are not in LIBS: (by the OPEN parameter)...
+
+
+   USAGE:
+   ~~~~~
+
+* LibList [pattern] lists only those libraries that matches the
+  given AmigaDOS style pattern
+
+* LibList KILL <library name> performs a dirty and absolute removal
+  of the specified library. No mercy. Programs using the killed
+  library will most likely crash with a blast!
+  The deletion is performed by setting the open counter to zero and
+  then calling the library's Expunge() vector.
+
+* LibList PUSH <library name> performs a slight renaming of the
+  mentioned library. Efficiant when programs already are using a
+  library and you want to be able to open another version of it
+  without affecting the rest of the system. The renaming is also
+  a very dirty trick that simply increases the first character in
+  the library name!
+
+* LibList OPEN <file name> opens the specified file as a library, and
+  immediately closes it! Made to enable easy replacing of libraries
+  currently in memory.
+
+* LibList NICE <library name> tries to kill the specified library
+  the proper way. This can only succeed if the library isn't
+  currently opened.
+
+* LibList FLUSH [pattern] simply flushes all libraries in memory that
+  match the AmigaDOS style pattern and are not currently in use
+  This is the same as trying a LibList NICE on all libraries in memory.

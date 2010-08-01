@@ -1,0 +1,283 @@
+ ******************************************************************************
+ *			  FREXX PROGRAMMING LANGUAGE			      *
+ ******************************************************************************
+ 
+ * liballoc.a
+ 
+ * Stack allocation/checking/expanding routines.
+
+ * Authors: Kjell Ericson and Daniel Stenberg
+ 
+ ******************************************************************************
+
+ ************************************************************************
+ *                                                                      *
+ * fpl.library - A shared library interpreting script langauge.         *
+ * Copyright (C) 1992-1994 FrexxWare                                    *
+ * Author: Daniel Stenberg                                              *
+ *                                                                      *
+ * This program is free software; you may redistribute for non          *
+ * commercial purposes only. Commercial programs must have a written    *
+ * permission from the author to use FPL. FPL is *NOT* public domain!   *
+ * Any provided source code is only for reference and for assurance     *
+ * that users should be able to compile FPL on any operating system     *
+ * he/she wants to use it in!                                           *
+ *                                                                      *
+ * You may not change, resource, patch files or in any way reverse      *
+ * engineer anything in the FPL package.                                *
+ *                                                                      *
+ * This program is distributed in the hope that it will be useful,      *
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of       *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.                 *
+ *                                                                      *
+ * Daniel Stenberg                                                      *
+ * Ankdammsgatan 36, 4tr                                                *
+ * S-171 43 Solna                                                       *
+ * Sweden                                                               *
+ *                                                                      *
+ * FidoNet 2:201/328    email:dast@sth.frontec.se                       *
+ *                                                                      *
+ ************************************************************************
+
+	; LibAlloc.a
+	;
+	; Allocate and expands the stack at need. a6 is always the FPLBase
+	; pointer when any of these routine are called!
+
+	CSECT	LibAlloc
+
+	xdef	_GetStackUsed	; long GetStackUsed(struct Data *);
+	xdef	_InitStack	; void InitStack(struct Data *)
+	xdef	_CheckStack	; long OK= CheckStack(struct Data *,
+				;		      long maxstack,
+				;		      long minstack);
+	xdef	_InterfaceCall	; long InterfaceCall(struct Data *,
+				;		     void **);
+				;		     func pointer);
+	xdef	_InterfaceCallNoStack ; long InterfaceCallNoStack(
+				;		     struct Data *,
+				;		     void **);
+				;		     func pointer);
+	xdef	_StoreRegisters ; void StoreRegisters(stuct Data *);
+	xref	_Script		; call this function!
+
+	xref	_Malloc		; malloc routine
+	xref	_Free		; free routine
+
+	IFD	LOCKFUNTIONS_WANTED
+
+	xdef	_Locker		; void Locker(long *data, char bit);
+	xdef	_Unlocker	; void Unlocker(long *data, char bit);
+
+	ENDC
+
+	include "exec/memory.i"
+	include "exec/tasks.i"
+	include "liballoc.i"
+
+asALLOCSTACK equ 5000	; Number of bytes added to current size when reallocing
+asINITCOPY equ 100	; Amout of memory copied from stack (even 4)
+MALLOC_STATIC equ 1	; Static allocation type specifier
+
+_InitStack: ; struct Data * in A2
+	    ; struct Expr * in A3
+	    ; short control in D2
+	    ; struct Condition * in A1
+
+	move.l	sp,DATA_EXT_STACK(a2)	; store external stack pointer
+	move.l	DATA_INT_STACK(a2),sp	; internal stack pointer in A0
+
+	move.l	DATA_TASK(a2),a0	; get task pointer in A0
+
+	move.l	TC_SPUPPER(a0),DATA_OLDTOP(a2)	; upper
+	move.l	TC_SPLOWER(a0),DATA_OLDBOT(a2)	; lower
+
+	move.l	DATA_STACKBASE(a2),d0	; get stack base in D0
+	add.l	DATA_STACKSIZE(a2),d0	; add stack size
+	move.l	d0,TC_SPUPPER(a0)	; set new stack upper bound
+
+	move.l	DATA_STACKBASE(a2),TC_SPLOWER(a0)	; set new stack lower bound
+
+	bsr	_Script		; don't mess with D0!!
+
+	move.l	DATA_TASK(a2),a0		; get task pointer in A0
+	move.l	TC_SPLOWER(a0),DATA_STACKBASE(a2)	; get new stack lower bound
+
+	move.l	DATA_OLDBOT(a2),TC_SPLOWER(a0)	; set lower bounds
+	move.l	DATA_OLDTOP(a2),TC_SPUPPER(a0)	; set upper bounds
+
+	move.l	sp,DATA_INT_STACK(a2)		; store internal stack pointer
+	move.l	DATA_EXT_STACK(a2),sp		; external stack pointer
+
+	rts
+
+_GetStackUsed: ;(struct Data * - A0)
+	move.l	a1,-(sp)		; backup A1
+	move.l	DATA_STACKBASE(a0),a1	; stack base address
+	move.l	sp,d0			; get stack pointer to d0
+	sub.l	a1,d0			; subtract stack base pointer
+	move.l	(sp)+,a1		; restore A1
+	rts
+
+_CheckStack: ;(struct Data * - A3; stack limit - D2 ; stack margin - D3)
+	movem.l	d1/a0/a1/a2,-(sp)	; [PUSH]
+
+	move.l	DATA_STACKBASE(a3),a0	; stack base address in A0
+
+	move.l	sp,d0			; stack pointer in D0
+	sub.l	a0,d0			; subtract stack base
+	cmp.l	d3,d0 			; stack usage larger than margin?
+	bpl	csend 			; no? return!
+	move.l	DATA_STACKSIZE(a3),d0	; current stack size to D0
+
+	add.l	d3,d0			; add margin size to stack size
+
+	cmp.l	d0,d2			; Compare with the stack limit
+
+	bmi	csend3	; reached stack limit, fail!
+
+	movem.l	d0/a0,-(sp)		; size in D0 [PUSH]
+	move.b	#MALLOC_STATIC,d1	; type
+	move.l	a3,a0			; struct Data *
+	IFD	DEBUG
+	lea.l	sourcename,a1
+	clr.l	d2
+	ENDC
+	jsr	_Malloc			; get memory
+	movem.l	(sp)+,d1/a0		: [POP] size is now in D1
+
+	tst.l	d0			; Did we get memory?
+	beq.s	csend2			; no memory, fail!
+	move.l	d0,a2			; memory pointer (stack base) in A2
+	move.l	d1,DATA_STACKSIZE(a3)	; store size in Data struct!
+
+	move.l	d1,d0			; get new size in D0
+	sub.l	d3,d0			; subtract the addition to get old
+
+	movem.l	a2/a3,-(sp)		; [PUSH]
+	move.l	a0,a1			; old stack base to A1
+	sub.l	d0,a2			; subtract old size from new base
+	add.l	d1,a2			; add new size to new base
+				; old size is in D0
+	sub.l	#4,d0			; count down four bytes now
+
+cslo1:	move.l	(a1)+,(a2)+		; move
+	sub.l	#4,d0
+	bpl.s	cslo1			; while positive, loop!
+
+	movem.l	(sp)+,a2/a3		; [POP]
+	move.l	sp,a1			; stack pointer to A1
+	sub.l	a0,a1			; subtract old stack base
+	add.l	a2,a1			; add new stack base
+	add.l	d3,a1			; add margin size
+;	add.l	#asALLOCSTACK,a1	; add stack realloc size
+	move.l	a1,sp			; SET NEW STACK POINTER!!!
+
+	move.l	DATA_TASK(a3),a1	; get task pointer in A1
+
+	move.l	a2,d0			; get stack base in D0
+	add.l	DATA_STACKSIZE(a3),d0	; add stack size
+	move.l	d0,TC_SPUPPER(a1)	; set new stack upper bound
+
+	move.l	a2,TC_SPLOWER(a1)	; set new stack lower bound
+
+			; Deallocate old stack
+	movem.l	a2/a3,-(sp)		; [PUSH]
+
+	move.l	a0,a1			; memory pointer to A1
+	move.l	a3,a0			; struct Data * to A0
+	move.b	#MALLOC_STATIC,d0	; type to D0
+	jsr	_Free
+	movem.l	(sp)+,a2/a3		; [POP]
+
+	move.l	a2,DATA_STACKBASE(a3)	; Store the new value
+csend:			; OK
+	moveq.l	#0,d0
+	movem.l	(sp)+,d1/a0/a1/a2	; [POP]
+	rts
+csend2:			; OUT OF MEM
+	moveq.l	#1,d0
+	movem.l	(sp)+,d1/a0/a1/a2	; [POP]
+	rts
+csend3:			; MAX STACK REACHED
+	moveq.l	#2,d0
+	movem.l	(sp)+,d1/a0/a1/a2	; [POP]
+	rts
+
+
+_InterfaceCall: ; struct Data * in A1
+		; void * in A0
+		; function pointer in A2
+
+	movem.l	d2-d7/a1/a3-a6,-(sp)	    ; store registers
+	move.l	DATA_TASK(a1),a3
+
+	move.l	DATA_OLDTOP(a1),TC_SPUPPER(a3)	; upper
+	move.l	DATA_OLDBOT(a1),TC_SPLOWER(a3)	; lower
+	move.l	sp,DATA_INT_STACK(a1)		; set internal pointer
+	move.l	DATA_EXT_STACK(a1),sp		; set external pointer
+
+	lea	DATA_REGISTERSTORAGE(a1),a3 ; get register buffer
+	move.l	a1,-(sp)		    ; store struct Data *
+	movem.l	(a3),d2-d7/a3-a6	    ; get registers from buffer
+	jsr	(a2)			    ; call interface function
+		; DON'T MESS WITH D0!!!
+
+	move.l	(sp)+,a1		    ; get struct Data * in A1
+
+	move.l	sp,DATA_EXT_STACK(a1)
+	move.l	DATA_INT_STACK(a1),sp
+
+	move.l	DATA_TASK(a1),a2
+	move.l	TC_SPUPPER(a2),DATA_OLDTOP(a1)	; upper
+	move.l	TC_SPLOWER(a2),DATA_OLDBOT(a1)	; lower
+
+	move.l	DATA_STACKBASE(a1),d1	; get stack base in D1
+	move.l	d1,TC_SPLOWER(a2)	; set new stack lower bound
+	add.l	DATA_STACKSIZE(a1),d1	; add stack size
+	move.l	d1,TC_SPUPPER(a2)	; set new stack upper bound
+
+	movem.l	(sp)+,d2-d7/a1/a3-a6	    ; restore old registers
+	rts
+
+_InterfaceCallNoStack: ; struct Data * in A1
+		; void * in A0
+		; function pointer in A2
+
+	movem.l	d2-d7/a1/a3-a6,-(sp)	    ; store registers
+	lea	DATA_REGISTERSTORAGE(a1),a3 ; get register buffer
+	movem.l	(a3),d2-d7/a3-a6	    ; get registers from buffer
+	jsr	(a2)			    ; call interface function
+		; DON'T MESS WITH D0!!!
+	movem.l	(sp)+,d2-d7/a1/a3-a6	    ; restore old registers
+	rts
+
+_StoreRegisters: ; struct Data * in A0
+	lea	DATA_REGISTERSTORAGE(a0),a0	; get register buffer address
+	movem.l	d2-d7/a3-a6,(a0)		; store registers in buffer
+	rts
+
+	IFD	DEBUG
+sourcename:
+	dc.b	'liballoc.a'
+	ENDC
+
+
+	IFD	LOCKFUNCTIONS_WANTED
+
+_Locker: ; long *data in A0
+	 ; char bit in D0
+
+	bset	d0,(a0)
+	bne.s	_Locker
+	rts
+
+_Unlocker: ; long *data in A0
+	   ; char bit in D0
+
+	bclr	d0,(a0)
+	rts
+
+	ENDC
+
+ END

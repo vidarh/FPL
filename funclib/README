@@ -1,0 +1,134 @@
+			   FUNCLIB DEVELOPMENT
+			   ===================
+
+  This directory contains source files to create a fully functional funclib
+that works with fpl.library version 7 and later.
+
+CODE
+----
+  Anyone can and may do a funclib. Just cut and paste from my examples and you
+should be able to make one in a very short time.
+
+STYLE GUIDE
+-----------
+  When you add functions with your own funclib, remember that to enable almost
+anyone to add those function names while their FPL session is running, the
+names you use must be unique! Therefore, I encourage you all to chose names
+which uses an acronym of the funclib name as a prefix or likewise (just like
+I have done with the fpl.library function names). If your funclib is called
+"foobar", call your functions fb_OpenWindow(), fb_CloseWindow() and so on...
+
+  Name your funclib in the form "<name>.funclib" with only lowercase letters!
+
+  Make sure your program handles cases where a function name is already used!
+
+STARTUP
+-------
+  The funclib should have an executable file placed in FPLLIBS: with the name
+of the funclib. In our example source, the name of the funclib and the
+executable is "func". This file is invoked both when the funclib is opened and
+when it is closed.
+  The executable file is, when the funclib is opened, started with three
+parameters. They are in the order of appearance:
+ "open"    - tells that the funclib is to be opened
+ <anchor>  - the FPL session anchor
+ <version> - the lowest acceptable version number of the funclib.
+
+  It is then up to the program to add functions to the FPL session. In my
+examples, this program starts another program ("lib") asynchronously and
+communicates with it through a named message port. Keep on reading for more
+details.
+
+CLOSE
+-----
+  When the funclib gets order to close down, it is started with two parameter:
+ "close"  - tells that the funclib should close
+ <anchor> - the FPL session anchor
+
+  In my example source, the program then tells "lib" to remove everything and
+exit.
+
+MY SOLUTION
+-----------
+  You can of course make the funclib work in several ways. The funclib is
+started as described above to make the funclib programmer as independent as
+possible. The funclib takes care of its own workings.
+
+  My solution works like the following little scheme will try to explain:
+
+1. The funclib "func" is opened (should be named "func.funclib"!) and the
+  program "FPLLIBS:func" is run:
+
+  |--------|
+  |  func  |
+  |--------|
+
+2. Func starts another program called "lib", which adds all functions that
+  this lib should add to the FPL session:
+
+  |--------|        |--------|
+  |  func  | =====> |  lib   |
+  |--------|        |--------|
+ 
+3. "lib" tells "func" through the named message port that it has done all
+  initial work and that "func" can return:
+
+  |--------|          |--------|
+  |  func  | <--OK--  |  lib   |
+  |--------|          |--------|
+
+4. "func" exists (and returns success to FPL), and "lib" is left in memory,
+  waiting for instruction sent to the message port:
+
+  |--------|
+  |  lib   |
+  |--------|
+
+5. When the funclib is closed, "func" is started again.
+
+  |--------|        |--------|
+  |  func  |        |  lib   |
+  |--------|        |--------|
+
+6. It uses the message port to tell "lib" to clean up and exit.
+
+  |--------|          |--------|
+  |  func  | -EXIT->  |  lib   |
+  |--------|          |--------|
+
+7. "lib" returns a message to "func" when it has cleaned up the FPL parts and
+  "func" can return to FPL.
+
+  |--------|          |--------|
+  |  func  | <-DONE-  |  lib   |
+  |--------|          |--------|
+
+8. Both "func" and "lib" exits.
+
+RETURN CODES
+============
+
+  The funclib return codes describe the progres to the invoking FPL. Use the
+return codes from the "funclib.h" file.
+
+SOURCE DESCRIPTION
+==================
+(all files are in the funclib/ directory)
+
+smakefile
+	makefile for the two funclib programs and the test program
+
+func.c
+	This file controls (starts and stops) the actual lib.
+
+lib.c
+	This is the actual lib. This program adds functions to the anchor
+	supplied from FPL.
+
+test.c
+	Test program source. (start it with "test test.fpl" for testing of
+	the "func" funclib.)
+
+test.fpl
+	Test FPL program that uses the test funclib and the test funclib
+	function.
