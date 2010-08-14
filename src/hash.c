@@ -1007,8 +1007,6 @@ static void * Init(struct Data *scr,	/* stack oriented */
   return((void *)ptr);
 }
 
-#ifndef AMIGA /* if not using SAS/C on Amiga */
-
 #ifdef VARARG_FUNCTIONS
 long fplResetTags(void *anchor, ...)
 {
@@ -1030,7 +1028,6 @@ long PREFIX fplResetTags(void *anchor, unsigned long tags, ...)
 }
 #endif
 
-#endif
 
 /**********************************************************************
  *
