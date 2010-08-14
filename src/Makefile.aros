@@ -61,7 +61,9 @@ LDFLAGS =
 all:	$(LIB) SFPL
 
 $(LIB) : $(LIBDEP)
-	$(AR) cr $(LIB) $(LDFLAGS) $(LIBOBJS)
+	$(LD) -r $(LIBOBJS) -o $(LIB).o 
+	$(AR) cr $(LIB).tmp $(LDFLAGS) $(LIB).o
+	objcopy -w --strip-unneeded --localize-symbol='!fpl*'  $(LIB).tmp $(LIB)
 	cp -p FPL.h ../include/libraries
 
 $(TARGET) : $(OBJS)
