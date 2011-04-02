@@ -46,7 +46,9 @@
 
 #ifdef AMIGA
 #include <exec/types.h>
+#ifndef __AROS__
 #include <proto/exec.h>
+#endif
 
 int CXBRK(void) { return(0); }  /* Disable Lattice/SAS CTRL/C handling */
 int chkabort(void) { return(0); }  /* really */

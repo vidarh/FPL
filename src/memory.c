@@ -42,7 +42,11 @@
 #elif defined(AMIGA)
 #include <exec/types.h>
 #include <exec/memory.h>
+#ifndef __AROS__
 #include <proto/exec.h>
+#else
+#include <clib/exec_protos.h>
+#endif
 #endif
 
 #include <stdio.h>

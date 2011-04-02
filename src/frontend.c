@@ -39,7 +39,11 @@
 
 #if defined(AMIGA)
 #include <exec/types.h>
+#ifndef __AROS__
 #include <proto/exec.h>
+#else
+#include <clib/exec_protos.h>
+#endif
 #elif defined(UNIX)
 #include <sys/types.h>
 #endif

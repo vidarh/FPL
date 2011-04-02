@@ -34,6 +34,10 @@
    Overrides the 'FREE' define */
 #define LOG printf /* printf style function to call */
 #else
+#include <exec/types.h>
+#ifndef __AROS__
+#include <proto/exec.h>
+#endif
 #define _FREE (FreeMem)
 #define _MALLOC (AllocMem)
 #define FREE_WITH_SIZE

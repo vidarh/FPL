@@ -3,34 +3,9 @@
 # This makefile should compile FPL under most UNIXes that has gcc _and_
 # support shared (dynamically linked) libraries.
 
-########################################################################
-#                                                                      #
-# fpl.library - A shared library interpreting script langauge.         #
-# Copyright (C) 1992-1996 FrexxWare                                    #
-# Author: Daniel Stenberg                                              #
-#                                                                      #
-# This program is free software; you may redistribute for non          #
-# commercial purposes only. Commercial programs must have a written    #
-# permission from the author to use FPL. FPL is *NOT* public domain!   #
-# Any provided source code is only for reference and for assurance     #
-# that users should be able to compile FPL on any operating system     #
-# he/she wants to use it in!                                           #
-#                                                                      #
-# You may not change, resource, patch files or in any way reverse      #
-# engineer anything in the FPL package.                                #
-#                                                                      #
-# This program is distributed in the hope that it will be useful,      #
-# but WITHOUT ANY WARRANTY; without even the implied warranty of       #
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.                 #
-#                                                                      #
-# Daniel Stenberg                                                      #
-# Ankdammsgatan 36, 4tr                                                #
-# S-171 43 Solna                                                       #
-# Sweden                                                               #
-#                                                                      #
-# FidoNet 2:201/328    email:dast@sth.frontec.se                       #
-#                                                                      #
-########################################################################
+# fpl.library - A shared library interpreting script langauge. 
+# Copyright (C) 1992-1996 FrexxWare
+# Author: Daniel Stenberg
 
 .SUFFIXES: .o .c .c~ .h .h~ .a .i
 
@@ -50,6 +25,27 @@ CFLAGS  = -DUNIX -DSHARED -ansi -pedantic -g -funsigned-char
 CC      = gcc
 LD      = ld
 
+UNAME := $(shell uname)
+TARGETOS=$(UNAME)
+
+ifdef CROSS
+TARGETOS=$(CROSS)
+ifeq ($(CROSS),AROS)
+CFLAGS	= -DAMIGA -D__AMIGA__ -D__AROS__  -ansi -pedantic -g -funsigned-char
+CC	= gcc
+LD	= ld
+endif
+
+ifneq ($(UNAME),AROS)
+CC	= i386-aros-gcc
+LD	= i386-aros-ld
+endif
+endif
+
+ifeq ($(TARGETOS),AROS)
+LDFLAGS += -larosc -ldos -lexec
+endif
+
 
 # -G makes the destination to become a sharable object!
 #    -B symbolic  In dynamic mode only, when  building  a  shared
@@ -64,12 +60,13 @@ LD      = ld
 # (The Send() function collided with the one with the same name used in
 # Dancer.)
 #
-LDFLAGS = -G -B symbolic
 
 all:	$(LIB) SFPL
 
 $(LIB) : $(LIBDEP)
-	$(LD) $(LDFLAGS) $(LIBOBJS) -o $(LIB) -lc
+#	$(LD) -r $(LDFLAGS) $(LIBOBJS) -o $(LIB).o
+	$(AR) cr $(LIB).tmp $(LDFLAGS) $(LIBOBJS)
+	objcopy -w --strip-unneeded --localize-symbol='!fpl*'  $(LIB).tmp $(LIB)
 	cp -p FPL.h ../include/libraries
 
 $(TARGET) : $(OBJS)
@@ -83,11 +80,12 @@ clean:
 
 # This compiling is using -DSFPL to make the MALLOC() macro not to use the
 # global `mem' variable!
-SFPL: caller.c FPL.h script.h Makefile.SVR4
-	$(CC) $(CFLAGS) -DSFPL -o SFPL caller.c -L. -lfpl
+SFPL: caller.o FPL.h script.h
+	$(CC) $(CFLAGS) -DSFPL -o SFPL caller.o -L. -lfpl $(LDFLAGS)
 
 $(OBJS): script.h FPL.h
 
+caller.o:caller.c
 script.o:script.c
 numexpr.o:numexpr.c
 caller.o:caller.c

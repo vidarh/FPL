@@ -39,7 +39,9 @@
 
 #ifdef AMIGA
 #include <exec/types.h>
+#ifndef __AROS__
 #include <proto/exec.h>
+#endif
 #include <libraries/dos.h>
 #include <proto/dos.h>
 

@@ -1,3 +1,5 @@
+#ifndef __FPL_SCRIPT_H
+#define __FPL_SCRIPT_H
 /******************************************************************************
  *		           FREXX PROGRAMMING LANGUAGE    		      *
  ******************************************************************************
@@ -1406,3 +1408,4 @@ ReturnCode REGARGS CmpExport(struct Data *);
 ReturnCode REGARGS CmpSwitch(struct Data *, struct Expr *);
 ReturnCode REGARGS CmpBreak(struct Data *, struct Expr *);
 
+#endif
